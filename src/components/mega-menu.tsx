@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Dialog } from "./dialog";
 import { translations, Language } from "@/lib/translations";
 import { X, ChevronRight, MapPin, Zap, ExternalLink, ShieldCheck, Phone, Sparkles } from "lucide-react";
 
@@ -22,7 +23,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0c0e12]/95 backdrop-blur-2xl text-white overflow-y-auto animate-fadeIn">
+    <Dialog title="Site navigation" onClose={onClose}><div className="fixed inset-0 z-50 bg-[#0c0e12]/95 backdrop-blur-2xl text-white overflow-y-auto animate-fadeIn">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen flex flex-col justify-between">
         {/* Top Header Bar matching Screenshot 3 */}
         <div className="flex items-center justify-between pb-6 border-b border-white/[0.08]">
@@ -84,7 +85,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
           {/* Column 1: Buy Electric Scooters */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
-              {t.buyElectricScooters}
+              Explore E-Luna
             </h4>
             <ul className="space-y-3 text-sm font-semibold text-slate-200">
               <li>
@@ -113,7 +114,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
               </li>
               <li>
                 <button
-                  onClick={() => handleLinkClick("get-in-touch")}
+                  onClick={() => handleLinkClick("/book-test-ride?model=Kinetic%20E-Luna%20PRO%20X3")}
                   className="hover:text-emerald-400 transition-colors flex items-center space-x-1 text-left"
                 >
                   <span>{t.bookProX3}</span>
@@ -124,7 +125,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
               </li>
               <li>
                 <button
-                  onClick={() => handleLinkClick("get-in-touch")}
+                  onClick={() => handleLinkClick("/book-test-ride?model=E-Luna%20Commercial%20Cargo")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
                   {t.bookCargo}
@@ -132,7 +133,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
               </li>
               <li>
                 <button
-                  onClick={() => handleLinkClick("get-in-touch")}
+                  onClick={() => handleLinkClick("/book-test-ride?model=E-Luna%20City%20Commuter")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
                   {t.bookCity}
@@ -143,7 +144,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("emi-calculator")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  {t.flexipay}
+                  Finance Enquiries
                 </button>
               </li>
             </ul>
@@ -157,7 +158,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
             <ul className="space-y-3 text-sm font-semibold text-slate-200">
               <li>
                 <button
-                  onClick={() => handleLinkClick("showrooms")}
+                  onClick={() => handleLinkClick("service")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
                   {t.vehicleService}
@@ -165,10 +166,10 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
               </li>
               <li>
                 <button
-                  onClick={() => handleLinkClick("features")}
+                  onClick={() => handleLinkClick("warranty")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  {t.batteryWarranty}
+                  Battery & Vehicle Warranty
                 </button>
               </li>
               <li>
@@ -225,7 +226,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("features")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  {t.blogsNav}
+                  Explore E-Luna features
                 </button>
               </li>
               <li>
@@ -312,6 +313,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Model Card 1 */}
             <div
+              role="button" tabIndex={0} onKeyDown={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();handleLinkClick("electric-family");}}}
               onClick={() => handleLinkClick("electric-family")}
               className="cursor-pointer group relative rounded-2xl p-4 bg-gradient-to-b from-[#181d26] to-[#0f1218] border border-white/[0.08] hover:border-white/30 transition-all flex items-center space-x-4"
             >
@@ -333,13 +335,14 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                 </div>
                 <p className="text-xs text-neutral-400 mt-0.5">2.3 kWh • 110 km Range</p>
                 <span className="text-xs font-bold text-white mt-1 block">
-                  ₹69,990*
+                  Request current quote
                 </span>
               </div>
             </div>
 
             {/* Model Card 2 */}
             <div
+              role="button" tabIndex={0} onKeyDown={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();handleLinkClick("electric-family");}}}
               onClick={() => handleLinkClick("electric-family")}
               className="cursor-pointer group relative rounded-2xl p-4 bg-gradient-to-b from-[#181d26] to-[#0f1218] border border-white/[0.08] hover:border-white/30 transition-all flex items-center space-x-4"
             >
@@ -356,13 +359,14 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                 </h5>
                 <p className="text-xs text-neutral-400 mt-0.5">150 kg Payload • Detachable Seat</p>
                 <span className="text-xs font-bold text-white mt-1 block">
-                  ₹74,990*
+                  Request current quote
                 </span>
               </div>
             </div>
 
             {/* Model Card 3 */}
             <div
+              role="button" tabIndex={0} onKeyDown={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();handleLinkClick("electric-family");}}}
               onClick={() => handleLinkClick("electric-family")}
               className="cursor-pointer group relative rounded-2xl p-4 bg-gradient-to-b from-[#181d26] to-[#0f1218] border border-white/[0.08] hover:border-white/30 transition-all flex items-center space-x-4"
             >
@@ -379,13 +383,13 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                 </h5>
                 <p className="text-xs text-neutral-400 mt-0.5">Family Ride • Dual Split Seats</p>
                 <span className="text-xs font-bold text-white mt-1 block">
-                  ₹64,990*
+                  Request current quote
                 </span>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div></Dialog>
   );
 }

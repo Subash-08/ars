@@ -4,11 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "typecheck": "tsc --noEmit --incremental false",
+    "test": "node --test tests/core.test.cjs",
+    "test:integration": "node tests/integration.cjs",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.21.1",

@@ -31,7 +31,7 @@ export function Navbar({
           {/* Left: Pure Ather Brand & Vehicle Links */}
           <div className="flex items-center space-x-8 lg:space-x-12">
             <a
-              href="#"
+              href="/"
               className="flex items-center space-x-2 group cursor-pointer"
             >
               <span className="text-xl sm:text-2xl font-black tracking-widest text-neutral-950 uppercase font-sans">
@@ -42,7 +42,7 @@ export function Navbar({
             {/* Model Links matching Ather: Konarc [New] | Rizta | Ather 450 */}
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8 text-xs font-semibold text-neutral-800">
               <button
-                onClick={() => onNavigate("electric-family")}
+                onClick={() => onNavigate("/e-luna#kinetic-e-luna-pro-x3")}
                 className="hover:text-black flex items-center space-x-1.5 transition-colors font-bold"
               >
                 <span>PRO X3</span>
@@ -51,13 +51,13 @@ export function Navbar({
                 </span>
               </button>
               <button
-                onClick={() => onNavigate("electric-family")}
+                onClick={() => onNavigate("/e-luna#e-luna-commercial-cargo")}
                 className="hover:text-black transition-colors"
               >
                 Cargo
               </button>
               <button
-                onClick={() => onNavigate("electric-family")}
+                onClick={() => onNavigate("/e-luna#e-luna-city-commuter")}
                 className="hover:text-black transition-colors"
               >
                 City Commuter

@@ -1,0 +1,43 @@
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { calculateEmi, calculateSavings } from "@/lib/calculations";
+import { bookingUrl } from "@/lib/navigation";
+import { Reveal } from "./reveal";
+const money = (value: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
+const field = "mt-2 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base text-neutral-900";
+function NumericInput({id,value,min,max,step,onValue}:{id:string;value:number;min:number;max:number;step:number;onValue:(value:number)=>void}) {
+  const [draft,setDraft]=useState(String(value));
+  useEffect(()=>setDraft(String(value)),[value]);
+  return <input id={id} className={field} type="number" inputMode="decimal" min={min} max={max} step={step} value={draft}
+    onChange={event=>{const next=event.target.value;setDraft(next);const n=Number(next);if(next!==""&&Number.isFinite(n)&&n>=min&&n<=max)onValue(n);}}
+    onBlur={()=>{const n=draft===""?value:Math.max(min,Math.min(max,Number(draft)));const safe=Number.isFinite(n)?n:value;setDraft(String(safe));onValue(safe);}}/>;
+}
+export function FinanceTools() {
+    const [price, setPrice] = useState(69990);
+    const [deposit, setDeposit] = useState(10000);
+    const [rate, setRate] = useState(9.5);
+    const [months, setMonths] = useState(24);
+    const [km, setKm] = useState(30);
+    const [days, setDays] = useState(26);
+    const [petrol, setPetrol] = useState(105);
+    const [mileage, setMileage] = useState(55);
+    const [tariff, setTariff] = useState(5.25);
+    const [energy, setEnergy] = useState(1.82);
+    const [brand, setBrand] = useState("");
+    const [age, setAge] = useState("3–6 years");
+    const emi = calculateEmi(price, deposit, rate, months);
+    const savings = calculateSavings(km, days, petrol, mileage, tariff, energy);
+    return <>
+    <section id="emi-calculator" className="py-12 sm:py-16 border-t border-neutral-200"><div className="max-w-7xl mx-auto px-5 sm:px-8"><Reveal><div className="grid lg:grid-cols-2 gap-8 sm:gap-14"><div><p className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">01 · Plan your payments</p><h2 className="text-3xl font-medium mt-3 tracking-tight">EMI, with the details in view.</h2><p className="mt-4 text-sm text-neutral-600 max-w-lg leading-relaxed">Enter the price from your quote. Estimates update when your inputs are valid. This illustration uses a reducing-balance calculation; it is not a lender offer or eligibility decision.</p><div className="grid sm:grid-cols-2 gap-5 mt-7">
+      <label className="text-sm" htmlFor="finance-price">Vehicle quote (₹)<NumericInput id="finance-price" value={price} min={10000} max={1000000} step={1000} onValue={setPrice}/></label>
+      <label className="text-sm" htmlFor="finance-deposit">Down payment (₹)<NumericInput id="finance-deposit" value={Math.min(deposit,price)} min={0} max={price} step={1000} onValue={setDeposit}/></label>
+      <label className="text-sm" htmlFor="finance-rate">Annual interest (%)<NumericInput id="finance-rate" value={rate} min={0} max={40} step={0.5} onValue={setRate}/></label>
+      <label className="text-sm" htmlFor="finance-months">Tenure<select id="finance-months" className={field} value={months} onChange={e => setMonths(Number(e.target.value))}>{[12, 24, 36, 48].map(n => <option key={n} value={n}>{n} months</option>)}</select></label>
+    </div></div><div className="rounded-3xl bg-neutral-950 text-white p-8 sm:p-12 flex flex-col justify-center"><p className="text-[11px] uppercase tracking-[0.2em] text-neutral-400">Estimated monthly repayment</p><p className="text-5xl sm:text-6xl font-medium tracking-tight mt-5" aria-live="polite">{money(emi)}<span className="text-sm text-neutral-400"> /mo</span></p><dl className="mt-8 space-y-3 text-sm"><div className="flex justify-between"><dt className="text-neutral-400">Amount financed</dt><dd>{money(Math.max(0, price - deposit))}</dd></div><div className="flex justify-between"><dt className="text-neutral-400">Total interest</dt><dd>{money(Math.max(0, emi * months - Math.max(0, price - deposit)))}</dd></div><div className="flex justify-between"><dt className="text-neutral-400">Total repayments</dt><dd>{money(emi * months)}</dd></div></dl><p className="text-xs text-neutral-400 mt-6 leading-relaxed">Default price is illustrative. Fees, insurance and other charges are excluded unless included in your entered quote. Approval and final rate are subject to the lender.</p><Link className="mt-7 inline-flex justify-center bg-white text-black rounded-full px-5 py-3 text-sm font-semibold" href={bookingUrl({ inquiry: "finance", context: `Quote ${money(price)}, down payment ${money(Math.min(deposit,price))}, ${months} months at ${rate}%, estimated EMI ${money(emi)}` })}>Ask about finance ↗</Link></div></div></Reveal></div></section>
+    <section id="savings-calculator" className="py-12 sm:py-16 border-t border-neutral-200 bg-neutral-50"><div className="max-w-7xl mx-auto px-5 sm:px-8"><Reveal><p className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">02 · Understand the running costs</p><h2 className="text-3xl font-medium mt-3 tracking-tight">Your routine. Your estimate.</h2><p className="mt-4 text-sm text-neutral-600 max-w-2xl">Compare fuel and electricity costs using your own assumptions. Energy use is per 100 km, not a full battery charge. Defaults are examples, not current tariff or manufacturer guarantees.</p><div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">{[
+            ["Daily distance (km)", "daily-km", km, setKm, 1, 300, 1], ["Riding days / month", "riding-days", days, setDays, 1, 31, 1], ["Petrol (₹ / litre)", "petrol-price", petrol, setPetrol, 1, 300, 1], ["Petrol mileage (km / litre)", "mileage", mileage, setMileage, 1, 150, 1], ["Electricity (₹ / kWh)", "tariff", tariff, setTariff, 0.1, 50, 0.1], ["Wall energy (kWh / 100 km)", "energy", energy, setEnergy, 0.1, 20, 0.01],
+        ].map(([label, id, value, set, min, max, step]) => <label key={String(id)} htmlFor={String(id)} className="text-sm">{String(label)}<NumericInput id={String(id)} value={value as number} min={min as number} max={max as number} step={step as number} onValue={set as (n:number)=>void}/></label>)}</div><div className="grid sm:grid-cols-3 gap-5 mt-8" aria-live="polite">{[["Petrol / riding day", savings.petrolDaily], ["Electricity / riding day", savings.electricDaily], ["Estimated annual difference", savings.annual]].map(([label, value]) => <div key={String(label)} className="rounded-2xl p-6 bg-white border border-neutral-200"><p className="text-xs text-neutral-500">{label}</p><p className="text-3xl font-medium tracking-tight mt-3">{money(Number(value))}</p></div>)}</div><p className="mt-5 text-xs text-neutral-500">Fuel and electricity only. Maintenance, financing, depreciation, charging availability and battery replacement are not included. A negative difference means higher estimated electricity cost. Distances above a vehicle's range may require additional charging.</p></Reveal></div></section>
+    <section id="exchange-estimator" className="py-12 sm:py-16 border-t border-neutral-200"><div className="max-w-7xl mx-auto px-5 sm:px-8"><Reveal><div className="grid md:grid-cols-2 gap-10"><div><p className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">03 · Make room for electric</p><h2 className="mt-3 text-3xl font-medium tracking-tight">Bring your current two-wheeler.</h2><p className="mt-4 text-sm text-neutral-600 leading-relaxed max-w-lg">Ask our showroom team about exchange availability. A fair valuation needs the vehicle's age, condition, documents and a physical inspection.</p></div><div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-6"><label className="text-sm" htmlFor="exchange-brand">Current vehicle<input id="exchange-brand" className={field} maxLength={100} placeholder="e.g. TVS XL 100" value={brand} onChange={e => setBrand(e.target.value)}/></label><label className="block mt-5 text-sm" htmlFor="exchange-age">Vehicle age<select id="exchange-age" className={field} value={age} onChange={e => setAge(e.target.value)}>{["0–3 years", "3–6 years", "6+ years"].map(a => <option key={a}>{a}</option>)}</select></label><Link href={bookingUrl({ inquiry: "exchange", brand, context: `Exchange enquiry: ${brand || "vehicle to be confirmed"}, age ${age}` })} className="mt-6 inline-flex rounded-full bg-black text-white px-6 py-3 text-sm font-semibold">Request an exchange valuation ↗</Link><p className="mt-4 text-xs text-neutral-500">No trade-in value or bonus is guaranteed online.</p></div></div></Reveal></div></section>
+  </>;
+}

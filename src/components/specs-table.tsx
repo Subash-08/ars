@@ -87,12 +87,12 @@ export function SpecsTable({ lang }: SpecsTableProps) {
           </div>
 
           <a
-            href="/assets/docs/kinetic-e-luna-brochure.pdf"
+            href="/book-test-ride?inquiry=brochure"
             download
             className="mt-4 md:mt-0 inline-flex items-center space-x-2 px-5 py-2.5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-900 font-semibold text-xs border border-neutral-300 transition-all self-start md:self-auto shadow-2xs"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Download Official Brochure (PDF)</span>
+            <span>Request Current Brochure</span>
           </a>
         </div>
 

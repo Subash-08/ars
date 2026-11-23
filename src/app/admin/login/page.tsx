@@ -9,17 +9,13 @@ export default function AdminLoginPage() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Default PIN: 1234 or "ars2026"
-    if (pin === "1234" || pin === "ars2026" || pin === "admin") {
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("ars_admin_auth", "true");
-      }
-      router.push("/admin");
-    } else {
-      setError(true);
-    }
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); setBusy(true); setError(false); setMessage("");
+    try { const res = await fetch("/api/auth/login", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({password:pin}) }); const data=await res.json(); if(!res.ok) throw new Error(data.error || "Login failed"); router.replace("/admin"); }
+    catch(err) { setError(true); setMessage(err instanceof Error ? err.message : "Login failed. Try again."); }
+    finally { setBusy(false); }
   };
 
   return (
@@ -37,13 +33,13 @@ export default function AdminLoginPage() {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="text-xs font-bold text-slate-300 block mb-2 text-left">
-              Enter Staff PIN / Password
+              Staff password
             </label>
             <div className="relative">
               <input
-                type="password"
+                type="password" autoComplete="current-password"
                 required
-                placeholder="Enter PIN (Default: 1234)"
+                placeholder="Enter your staff password"
                 value={pin}
                 onChange={(e) => {
                   setPin(e.target.value);
@@ -57,12 +53,12 @@ export default function AdminLoginPage() {
 
           {error && (
             <p className="text-xs font-semibold text-rose-400">
-              Invalid PIN. Use default: 1234
+              {message}
             </p>
           )}
 
           <button
-            type="submit"
+            type="submit" disabled={busy}
             className="w-full py-3.5 px-6 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-2"
           >
             <span>Unlock CRM Dashboard</span>

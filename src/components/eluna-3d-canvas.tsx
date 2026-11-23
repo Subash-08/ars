@@ -2,11 +2,15 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+const roundedBox=(width:number,height:number,depth:number)=>new RoundedBoxGeometry(width,height,depth,3,Math.min(width,height,depth)*0.22);
 
 export type VariantType = "pro_x3" | "cargo" | "commuter";
 export type TimeOfDay = "day" | "night";
 
 export interface Eluna3DCanvasProps {
+  resetKey?: number;
   variant: VariantType;
   colorHex: string;
   colorName?: string;
@@ -29,6 +33,7 @@ export interface HotspotScreenPos {
 }
 
 export function Eluna3DCanvas({
+  resetKey,
   variant,
   colorHex,
   timeOfDay,
@@ -40,6 +45,7 @@ export function Eluna3DCanvas({
   onInteracted,
 }: Eluna3DCanvasProps) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [webglError,setWebglError] = useState(false);
 
   // Hotspots projected 2D coordinates
   const [hotspotPositions, setHotspotPositions] = useState<HotspotScreenPos[]>([]);
@@ -112,6 +118,8 @@ export function Eluna3DCanvas({
     },
   ]);
 
+  useEffect(()=>{targetThetaRef.current=Math.PI/4;targetPhiRef.current=Math.PI/2.45;targetRadiusRef.current=3.6;angularVelocityRef.current=0;},[resetKey]);
+
   // Update Paint Material Color on prop change
   useEffect(() => {
     if (paintMaterialRef.current) {
@@ -150,7 +158,7 @@ export function Eluna3DCanvas({
 
   // Handle external targetAngle updates (from range slider or preset buttons)
   useEffect(() => {
-    if (typeof targetAngle === "number" && !isDraggingRef.current) {
+    if (typeof targetAngle === "number" && !isDraggingRef.current && Math.abs(targetAngle-lastReportedDegRef.current)>1) {
       const targetRad = (targetAngle * Math.PI) / 180;
       const current = targetThetaRef.current;
       const twoPi = Math.PI * 2;
@@ -183,21 +191,30 @@ export function Eluna3DCanvas({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 50);
+    const fitFov=(w:number,h:number)=>THREE.MathUtils.radToDeg(2*Math.atan(Math.tan(THREE.MathUtils.degToRad(36)/2)/Math.min(1,w/Math.max(h,1))));
+    const camera = new THREE.PerspectiveCamera(fitFov(width,height), width / height, 0.1, 50);
     cameraRef.current = camera;
 
-    const renderer = new THREE.WebGLRenderer({
+    let renderer: THREE.WebGLRenderer;
+    try { renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
-      powerPreference: "high-performance",
-    });
+      powerPreference: "default",
+    }); } catch { setWebglError(true); return; }
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rendererRef.current = renderer;
+    const environmentScene=new RoomEnvironment();
+    const environmentGenerator=new THREE.PMREMGenerator(renderer);
+    const environmentTarget=environmentGenerator.fromScene(environmentScene,0.04);
+    scene.environment=environmentTarget.texture;
+    scene.environmentIntensity=0.55;
+    environmentScene.dispose(); environmentGenerator.dispose();
 
     container.appendChild(renderer.domElement);
 
@@ -409,7 +426,7 @@ export function Eluna3DCanvas({
     headlampGroup.position.set(0, 0.90, 0.68);
 
     // Rectangular Matte Black Mask
-    const maskGeo = new THREE.BoxGeometry(0.19, 0.19, 0.13);
+    const maskGeo = roundedBox(0.19, 0.19, 0.13);
     const maskMesh = new THREE.Mesh(maskGeo, matteBlackMat);
     headlampGroup.add(maskMesh);
 
@@ -432,7 +449,7 @@ export function Eluna3DCanvas({
     headlampGroup.add(lensMesh);
 
     // Sleek Digital LCD Instrument Console mounted above headlamp
-    const consoleGeo = new THREE.BoxGeometry(0.16, 0.035, 0.08);
+    const consoleGeo = roundedBox(0.16, 0.035, 0.08);
     const consoleMesh = new THREE.Mesh(consoleGeo, matteBlackMat);
     consoleMesh.position.set(0, 0.13, -0.01);
     consoleMesh.rotation.x = -Math.PI / 7;
@@ -470,7 +487,7 @@ export function Eluna3DCanvas({
       barGroup.add(stemMesh);
 
       // Rectangular Mirror Glass Housing
-      const mirrorGeo = new THREE.BoxGeometry(0.09, 0.065, 0.015);
+      const mirrorGeo = roundedBox(0.09, 0.065, 0.015);
       const mirrorMesh = new THREE.Mesh(mirrorGeo, matteBlackMat);
       mirrorMesh.position.set(xSide * 1.05, 0.24, -0.03);
       mirrorMesh.rotation.x = -0.15;
@@ -483,7 +500,7 @@ export function Eluna3DCanvas({
     // 4. STEP-THROUGH APRON, BATTERY COMPARTMENT & COOLING LOUVERS
     // --------------------------------------------------------
     // Front Leg Shield Apron
-    const apronGeo = new THREE.BoxGeometry(0.24, 0.42, 0.06);
+    const apronGeo = roundedBox(0.24, 0.42, 0.06);
     const apronMesh = new THREE.Mesh(apronGeo, matteBlackMat);
     apronMesh.position.set(0, 0.60, 0.38);
     apronMesh.rotation.x = Math.PI / 8;
@@ -491,14 +508,14 @@ export function Eluna3DCanvas({
     vehicle.add(apronMesh);
 
     // Flat Footboard
-    const deckGeo = new THREE.BoxGeometry(0.34, 0.03, 0.48);
+    const deckGeo = roundedBox(0.34, 0.03, 0.48);
     const deckMesh = new THREE.Mesh(deckGeo, matteBlackMat);
     deckMesh.position.set(0, 0.30, 0.05);
     deckMesh.receiveShadow = true;
     vehicle.add(deckMesh);
 
     // Mid-Mounted Battery Box
-    const batteryGeo = new THREE.BoxGeometry(0.25, 0.32, 0.34);
+    const batteryGeo = roundedBox(0.25, 0.32, 0.34);
     const batteryMesh = new THREE.Mesh(batteryGeo, matteBlackMat);
     batteryMesh.position.set(0, 0.47, -0.06);
     batteryMesh.castShadow = true;
@@ -512,7 +529,7 @@ export function Eluna3DCanvas({
     for (let i = 0; i < 5; i++) {
       const yOffset = 0.38 + i * 0.04;
       [-0.13, 0.13].forEach((xSide) => {
-        const louverGeo = new THREE.BoxGeometry(0.01, 0.015, 0.24);
+        const louverGeo = roundedBox(0.01, 0.015, 0.24);
         const louverMesh = new THREE.Mesh(louverGeo, louverMat);
         louverMesh.position.set(xSide, yOffset, -0.06);
         vehicle.add(louverMesh);
@@ -520,7 +537,7 @@ export function Eluna3DCanvas({
     }
 
     // Rear Swingarm & "Luna" Drive Guard
-    const swingarmGeo = new THREE.BoxGeometry(0.28, 0.14, 0.45);
+    const swingarmGeo = roundedBox(0.28, 0.14, 0.45);
     const swingarmMesh = new THREE.Mesh(swingarmGeo, matteBlackMat);
     swingarmMesh.position.set(0, 0.40, -0.52);
     swingarmMesh.castShadow = true;
@@ -626,7 +643,7 @@ export function Eluna3DCanvas({
     // 6. ERGONOMIC SPLIT SEATS (Matching reference photo)
     // --------------------------------------------------------
     // Front Rider Seat
-    const riderSeatGeo = new THREE.BoxGeometry(0.26, 0.09, 0.28);
+    const riderSeatGeo = roundedBox(0.26, 0.09, 0.28);
     const riderSeat = new THREE.Mesh(riderSeatGeo, leatherSeatMat);
     riderSeat.position.set(0, 0.76, -0.06);
     riderSeat.castShadow = true;
@@ -634,7 +651,7 @@ export function Eluna3DCanvas({
 
     // Modular Variant A: PRO X3 (Pillion Seat + Pillion Grab Rail)
     const proSeatGroup = new THREE.Group();
-    const pillionSeatGeo = new THREE.BoxGeometry(0.24, 0.08, 0.28);
+    const pillionSeatGeo = roundedBox(0.24, 0.08, 0.28);
     const pillionSeat = new THREE.Mesh(pillionSeatGeo, leatherSeatMat);
     pillionSeat.position.set(0, 0.77, -0.42);
     pillionSeat.castShadow = true;
@@ -652,7 +669,7 @@ export function Eluna3DCanvas({
 
     // Modular Variant B: Commercial Cargo (Flatbed + Blue Delivery Crate)
     const cargoGroup = new THREE.Group();
-    const carrierBedGeo = new THREE.BoxGeometry(0.36, 0.04, 0.58);
+    const carrierBedGeo = roundedBox(0.36, 0.04, 0.58);
     const carrierBed = new THREE.Mesh(carrierBedGeo, darkSteelMat);
     carrierBed.position.set(0, 0.72, -0.46);
     carrierBed.castShadow = true;
@@ -663,7 +680,7 @@ export function Eluna3DCanvas({
       roughness: 0.5,
       metalness: 0.1,
     });
-    const crateGeo = new THREE.BoxGeometry(0.32, 0.26, 0.42);
+    const crateGeo = roundedBox(0.32, 0.26, 0.42);
     const crate = new THREE.Mesh(crateGeo, crateMat);
     crate.position.set(0, 0.87, -0.46);
     crate.castShadow = true;
@@ -675,7 +692,7 @@ export function Eluna3DCanvas({
 
     // Modular Variant C: City Commuter (Comfort Split Seat + Protective Saree Guard)
     const commuterGroup = new THREE.Group();
-    const comfortSeatGeo = new THREE.BoxGeometry(0.25, 0.10, 0.32);
+    const comfortSeatGeo = roundedBox(0.25, 0.10, 0.32);
     const comfortSeat = new THREE.Mesh(comfortSeatGeo, leatherSeatMat);
     comfortSeat.position.set(0, 0.76, -0.42);
     comfortSeat.castShadow = true;
@@ -698,11 +715,21 @@ export function Eluna3DCanvas({
     commuterGroupRef.current = commuterGroup;
 
     scene.add(vehicle);
+    if(timeOfDay === "night"){
+      sunLight.intensity=0.5;sunLight.color.setHex(0x38bdf8);
+      ambientLight.intensity=0.6;ambientLight.color.setHex(0x1e293b);
+      headlightSpot.intensity=9;beamMesh.visible=true;
+    }
 
     // ========================================================
     // ANIMATION & RENDER LOOP WITH INERTIA DAMPING
     // ========================================================
-    let animationFrameId: number;
+    let animationFrameId = 0;
+    let visible = false;
+    let lastFrame = 0;
+    let lastHotspots = 0;
+    let lastAngle = 0;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const updateCamera = () => {
       if (isAutoRotateRef.current && !isDraggingRef.current) {
@@ -714,7 +741,7 @@ export function Eluna3DCanvas({
         angularVelocityRef.current *= 0.92;
       }
 
-      currentThetaRef.current += (targetThetaRef.current - currentThetaRef.current) * 0.12;
+      currentThetaRef.current += (targetThetaRef.current - currentThetaRef.current) * (reducedMotion ? 1 : 0.18);
       currentPhiRef.current += (targetPhiRef.current - currentPhiRef.current) * 0.12;
       currentRadiusRef.current += (targetRadiusRef.current - currentRadiusRef.current) * 0.12;
 
@@ -730,7 +757,8 @@ export function Eluna3DCanvas({
       camera.lookAt(panOffsetRef.current);
 
       const deg = Math.round((((theta % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI));
-      if (onAngleChangeRef.current && Math.abs(deg - lastReportedDegRef.current) >= 1) {
+      if (onAngleChangeRef.current && performance.now()-lastAngle > 100 && Math.abs(deg - lastReportedDegRef.current) >= 1) {
+        lastAngle = performance.now();
         lastReportedDegRef.current = deg;
         onAngleChangeRef.current(deg);
       }
@@ -750,7 +778,7 @@ export function Eluna3DCanvas({
         worldPos.applyMatrix4(vehicle.matrixWorld);
         worldPos.project(currentCam);
 
-        const isVisible = worldPos.z < 1;
+        const isVisible = worldPos.z > -1 && worldPos.z < 1 && Math.abs(worldPos.x)<1 && Math.abs(worldPos.y)<1;
         const screenX = worldPos.x * halfW + halfW;
         const screenY = -(worldPos.y * halfH) + halfH;
 
@@ -764,24 +792,31 @@ export function Eluna3DCanvas({
         });
       });
 
-      setHotspotPositions(screenPositions);
+      setHotspotPositions(previous => previous.length === screenPositions.length && previous.every((p,i)=>p.visible===screenPositions[i].visible && Math.abs(p.x-screenPositions[i].x)<0.5 && Math.abs(p.y-screenPositions[i].y)<0.5) ? previous : screenPositions);
     };
 
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
-
-      updateCamera();
-      renderer.render(scene, camera);
-      updateHotspots2D();
+    const animate = (time: number) => {
+      if (!visible || document.hidden) { animationFrameId=0; return; }
+      animationFrameId=requestAnimationFrame(animate);
+      if(time-lastFrame < 32) return;
+      lastFrame=time;
+      updateCamera(); renderer.render(scene,camera);
+      if(time-lastHotspots > 80) { updateHotspots2D(); lastHotspots=time; }
     };
-
-    animate();
+    const resume = () => { if(visible && !document.hidden && !animationFrameId) animationFrameId=requestAnimationFrame(animate); };
+    const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;if(!visible){cancelAnimationFrame(animationFrameId);animationFrameId=0;}else resume();},{threshold:0.01});
+    observer.observe(container);
+    document.addEventListener("visibilitychange",resume);
+    const contextLost=(event:Event)=>{event.preventDefault();setWebglError(true);cancelAnimationFrame(animationFrameId);animationFrameId=0;};
+    renderer.domElement.addEventListener("webglcontextlost",contextLost);
 
     const handleResize = () => {
       if (!container || !rendererRef.current || !cameraRef.current) return;
       const newW = container.clientWidth;
       const newH = container.clientHeight;
+      if(newW<=0||newH<=0)return;
       cameraRef.current.aspect = newW / newH;
+      cameraRef.current.fov = fitFov(newW,newH);
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(newW, newH);
     };
@@ -792,16 +827,27 @@ export function Eluna3DCanvas({
     return () => {
       cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
+      observer.disconnect();
+      document.removeEventListener("visibilitychange",resume);
+      renderer.domElement.removeEventListener("webglcontextlost",contextLost);
+      const geometries=new Set<THREE.BufferGeometry>(); const materials=new Set<THREE.Material>();
+      scene.traverse(object=>{if(object instanceof THREE.Mesh){geometries.add(object.geometry);(Array.isArray(object.material)?object.material:[object.material]).forEach(material=>materials.add(material));}});
+      geometries.forEach(geometry=>geometry.dispose()); materials.forEach(material=>material.dispose());
+      sunLight.shadow.dispose();
       if (renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
+      shadowTex.dispose();
+      environmentTarget.dispose();
       renderer.dispose();
+      rendererRef.current=null;
     };
   }, []);
 
   // Pointer & Touch drag handlers
   const handlePointerDown = (e: React.PointerEvent) => {
-    e.preventDefault();
+    if ((e.target as HTMLElement).closest("button")) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
     isDraggingRef.current = true;
     prevPointerRef.current = { x: e.clientX, y: e.clientY };
     angularVelocityRef.current = 0;
@@ -830,30 +876,38 @@ export function Eluna3DCanvas({
 
   // Smooth scroll to rotate 360° in 3D
   const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
+    if (!e.shiftKey) return;
     if (onInteracted) onInteracted();
-
-    if (e.ctrlKey) {
-      targetRadiusRef.current = Math.max(
-        2.2,
-        Math.min(5.0, targetRadiusRef.current + e.deltaY * 0.003)
-      );
-    } else {
-      const delta = (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * 0.0038;
-      targetThetaRef.current += delta;
-      angularVelocityRef.current = delta * 0.35;
+    targetThetaRef.current += e.deltaY * 0.003;
+  };
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home"].includes(e.key)) {
+      e.preventDefault(); onInteracted?.();
+      if(e.key==="ArrowLeft")targetThetaRef.current-=0.25;
+      if(e.key==="ArrowRight")targetThetaRef.current+=0.25;
+      if(e.key==="ArrowUp")targetRadiusRef.current=Math.max(2.2,targetRadiusRef.current-0.2);
+      if(e.key==="ArrowDown")targetRadiusRef.current=Math.min(5,targetRadiusRef.current+0.2);
+      if(e.key==="Home"){targetThetaRef.current=Math.PI/4;targetRadiusRef.current=3.6;targetPhiRef.current=Math.PI/2.45;}
     }
   };
+  if(webglError)return <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8"><img src="/assets/bikes/studio-yellow-hd.jpg" alt="E-Luna product photograph" className="max-h-[60%] object-contain"/><p role="status" className="text-sm text-center">Interactive 3D is unavailable on this device. Use Product Photos above.</p></div>;
 
   return (
     <div
       ref={mountRef}
+      tabIndex={0}
+      role="group"
+      aria-label="Interactive vehicle illustration. Drag horizontally or use left and right arrow keys to rotate. Up and down arrows zoom. Home resets the camera."
+      onKeyDown={handleKeyDown}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onLostPointerCapture={handlePointerUp}
       onPointerLeave={handlePointerUp}
       onWheel={handleWheel}
-      className="relative w-full h-full cursor-grab active:cursor-grabbing select-none overflow-hidden touch-none"
+      className="relative w-full h-full cursor-grab active:cursor-grabbing select-none overflow-hidden touch-pan-y"
     >
       {/* 3D World-Space Projected Hotspots */}
       {hotspotPositions.map(
@@ -871,9 +925,10 @@ export function Eluna3DCanvas({
               }}
               className="absolute z-20 -translate-x-1/2 -translate-y-1/2 group pointer-events-auto transition-transform hover:scale-125"
               title={`${spot.name} - ${spot.spec}`}
+              aria-label={`Explore ${spot.name}`}
             >
               <div className="relative flex items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-7 w-7 rounded-full bg-emerald-400 opacity-60" />
+                <span className="absolute inline-flex h-7 w-7 rounded-full bg-emerald-400 opacity-25" />
                 <div className="relative w-6 h-6 rounded-full bg-emerald-500 text-black flex items-center justify-center shadow-2xl border-2 border-white">
                   <span className="text-[10px] font-black leading-none">+</span>
                 </div>

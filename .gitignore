@@ -1,0 +1,15 @@
+node_modules/
+.next*/
+out/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+*.log
+prisma/*.db
+prisma/*.db-*
+prisma/*.sqlite*
+src/generated/
+test-results/

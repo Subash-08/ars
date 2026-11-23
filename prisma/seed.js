@@ -1,31 +1,11 @@
-const { PrismaClient } = require("./../src/generated/client");
-const crypto = require("crypto");
+const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
-
-function hashPassword(password) {
-  return crypto.createHash("sha256").update(password).digest("hex");
-}
 
 async function main() {
   console.log("Seeding ARS Motors database...");
 
-  // 1. Seed Admin User
-  const existingAdmin = await prisma.adminUser.findUnique({
-    where: { email: "admin@arsmotors.in" },
-  });
-
-  if (!existingAdmin) {
-    await prisma.adminUser.create({
-      data: {
-        email: "admin@arsmotors.in",
-        passwordHash: hashPassword("admin123"),
-        name: "ARS Motors Salem Admin",
-        role: "admin",
-      },
-    });
-    console.log("Admin user created (admin@arsmotors.in / admin123)");
-  }
+  // Staff access is configured with ADMIN_PASSWORD and AUTH_SECRET, never a seeded default.
 
   // 2. Seed Categories
   const categories = [
@@ -70,7 +50,7 @@ async function main() {
       payload: "150 kg",
       battery: "2.3 kWh Advanced Li-ion",
       motor: "1.2 kW BLDC / 2.2 kW Peak",
-      warranty: "5 Years / 50,000 km",
+      warranty: "Confirm component coverage with showroom",
       image: "/assets/bikes/hires-yellow.jpg",
       description: "India's legendary workhorse, completely electrified. 110 km certified range, 2.3 kWh battery, 5 signature metallic finishes.",
       isPublished: true,
@@ -86,7 +66,7 @@ async function main() {
       payload: "150 kg",
       battery: "2.3 kWh Advanced Li-ion",
       motor: "1.2 kW BLDC",
-      warranty: "5 Years / 50,000 km",
+      warranty: "Confirm component coverage with showroom",
       image: "/assets/bikes/cargo-heavy-hd.jpg",
       description: "Built for businesses and delivery fleets. Quick-release detachable rear seat transforms into a flat heavy-duty steel carrier bed.",
       isPublished: true,
@@ -102,7 +82,7 @@ async function main() {
       payload: "130 kg",
       battery: "1.7 kWh Li-ion",
       motor: "1.2 kW BLDC",
-      warranty: "3 Years / 30,000 km",
+      warranty: "Confirm component coverage with showroom",
       image: "/assets/bikes/commuter-family-hd.jpg",
       description: "Designed for family comfort. Features ergonomic dual cushioned split seats, protective steel saree guard, and smooth telescopic suspension.",
       isPublished: true,

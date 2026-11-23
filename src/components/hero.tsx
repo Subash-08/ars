@@ -6,9 +6,10 @@ import { ArrowRight, ChevronRight, Zap, Shield, Sparkles } from "lucide-react";
 
 interface HeroProps {
   lang: Language;
-  onBookTestRide: () => void;
+  onBookTestRide: (model?: string) => void;
   onExplore360: () => void;
-  onLearnMore: () => void;
+  onLearnMore: (model?: string) => void;
+  onCalculateSavings?: () => void;
 }
 
 export function Hero({
@@ -16,31 +17,34 @@ export function Hero({
   onBookTestRide,
   onExplore360,
   onLearnMore,
+  onCalculateSavings,
 }: HeroProps) {
   const t = translations[lang];
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [paused,setPaused]=useState(false);
+  const [userPaused,setUserPaused]=useState(false);
 
   const slides = [
     // Variant 1: Kinetic E-Luna PRO X3 (Flagship Golden Studio Reference)
     {
       id: "pro-x3",
       variantName: "Kinetic E-Luna PRO X3",
-      pillBadge: "Flagship • 110 km Certified Range",
+      pillBadge: "Flagship • 110 km Listed Range*",
       headlineLine1: "Kinetic E-Luna PRO X3",
       headlineLine2: "Make life look easy",
       subhead:
-        "110 km Certified Range • 50 km/h Top Speed • 2.3 kWh Advanced Li-ion Battery • 10 paise/km",
+        "110 km Listed Range* • 50 km/h Top Speed • 2.3 kWh Advanced Li-ion Battery • Indicative specifications; confirm at showroom",
       image: "/assets/bikes/hero-pro-x3-golden.jpg",
       specs: [
-        { label: "Certified Range", value: "110 km" },
+        { label: "Listed Range*", value: "110 km" },
         { label: "Top Speed", value: "50 km/h" },
         { label: "Battery Pack", value: "2.3 kWh" },
-        { label: "Running Cost", value: "10p / km" },
+        { label: "Quote", value: "Ask our team" },
       ],
       primaryBtn: "Book PRO X3",
-      primaryAction: onBookTestRide,
+      primaryAction: () => onBookTestRide("Kinetic E-Luna PRO X3"),
       secondaryBtn: "Explore Specifications",
-      secondaryAction: onLearnMore,
+      secondaryAction: () => onLearnMore("Kinetic E-Luna PRO X3"),
     },
     // Variant 2: E-Luna Commercial Cargo (Heavy-Duty Logistics Reference)
     {
@@ -50,18 +54,18 @@ export function Hero({
       headlineLine1: "E-Luna Commercial Cargo",
       headlineLine2: "Built for heavy delivery & commercial fleets",
       subhead:
-        "150 kg Payload Capacity • Detachable Rear Seat with Flat Steel Cargo Rack • ₹5,000 Exchange Bonus",
+        "150 kg Payload Capacity • Detachable Rear Seat with Flat Steel Cargo Rack • Ask About Exchange Options",
       image: "/assets/bikes/hero-commercial-cargo.jpg",
       specs: [
         { label: "Payload Capacity", value: "150 kg" },
-        { label: "Certified Range", value: "100 km" },
+        { label: "Listed Range*", value: "100 km" },
         { label: "Cargo Bed", value: "Flat Steel" },
-        { label: "Monthly Fuel Saving", value: "₹4,700+" },
+        { label: "Local Support", value: "Salem" },
       ],
       primaryBtn: "Book Cargo Edition",
-      primaryAction: onBookTestRide,
+      primaryAction: () => onBookTestRide("E-Luna Commercial Cargo"),
       secondaryBtn: "Fleet Inquiries",
-      secondaryAction: onBookTestRide,
+      secondaryAction: () => onBookTestRide("E-Luna Commercial Cargo"),
     },
     // Variant 3: E-Luna City Commuter (Family Comfort Reference)
     {
@@ -71,32 +75,34 @@ export function Hero({
       headlineLine1: "E-Luna City Commuter",
       headlineLine2: "Electric comfort for the whole family",
       subhead:
-        "Dual Cushioned Split Seating • Protective Saree Guard • Telescopic Front Suspension • 4-Hr Home 3-Pin Charging",
+        "Dual Cushioned Split Seating • Protective Saree Guard • Telescopic Front Suspension • Ask About Home Charging",
       image: "/assets/bikes/hero-city-commuter.jpg",
       specs: [
         { label: "Seating", value: "Dual Split" },
-        { label: "Charging", value: "4-Hr 3-Pin" },
-        { label: "Certified Range", value: "90 km" },
+        { label: "Charging", value: "Home charging" },
+        { label: "Listed Range*", value: "90 km" },
         { label: "Safety", value: "Saree Guard" },
       ],
       primaryBtn: "Book Commuter",
-      primaryAction: onBookTestRide,
+      primaryAction: () => onBookTestRide("E-Luna City Commuter"),
       secondaryBtn: "Calculate Savings",
-      secondaryAction: onLearnMore,
+      secondaryAction: onCalculateSavings || (() => onLearnMore("E-Luna City Commuter")),
     },
   ];
 
   useEffect(() => {
+    if (paused || userPaused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 7000);
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [slides.length,paused,userPaused]);
 
   const slide = slides[currentSlide];
 
   return (
-    <section className="relative w-full h-[90vh] md:h-[94vh] min-h-[640px] max-h-[980px] overflow-hidden flex flex-col justify-between text-white select-none bg-neutral-950">
+    <section onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)} onFocusCapture={()=>setPaused(true)} className="relative w-full h-[90vh] md:h-[94vh] min-h-[640px] max-h-[980px] overflow-hidden flex flex-col justify-between text-white select-none bg-neutral-950">
+      <button className="skip-link" onClick={()=>setUserPaused(!userPaused)}>{userPaused?"Resume hero slides":"Pause hero slides"}</button>
       {/* 1. Full-Bleed Edge-to-Edge Background Image */}
       <div className="absolute inset-0 z-0">
         <img
@@ -121,7 +127,7 @@ export function Hero({
           {slides.map((s, index) => (
             <button
               key={s.id}
-              onClick={() => setCurrentSlide(index)}
+              onClick={() => {setCurrentSlide(index);setUserPaused(true);}}
               className={`px-3.5 sm:px-5 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
                 currentSlide === index
                   ? "bg-white text-neutral-950 shadow-md font-bold"

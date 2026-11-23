@@ -26,7 +26,7 @@ export function Footer({ lang }: FooterProps) {
               </span>
             </div>
             <p className="text-neutral-400 max-w-md leading-relaxed mb-4">
-              Authorized 3S Dealership for Kinetic Green E-Luna in Salem, Tamil Nadu. Delivering certified electric vehicles, authorized spare parts, battery maintenance, and flexible financing with spot loan approvals.
+              Authorized 3S Dealership for Kinetic Green E-Luna in Salem, Tamil Nadu. Delivering certified electric vehicles, authorized spare parts, battery maintenance, and finance enquiries through our Salem team.
             </p>
             <div className="text-[11px] text-neutral-500 font-medium">
               Kinetic Green Energy & Power Solutions • Planet @ Our Heart
@@ -72,22 +72,28 @@ export function Footer({ lang }: FooterProps) {
             © 2026 ARS Motors Salem. All rights reserved. Authorized Kinetic Green Partner.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-neutral-400">
-            <a href="#electric-family" className="hover:text-white transition-colors">
+            <a href="/e-luna" className="hover:text-white transition-colors">
               Vehicles
             </a>
             <span>•</span>
-            <a href="#savings-calculator" className="hover:text-white transition-colors">
+            <a href="/finance-offers#savings-calculator" className="hover:text-white transition-colors">
               Savings Calculator
             </a>
             <span>•</span>
-            <a href="#emi-calculator" className="hover:text-white transition-colors">
+            <a href="/finance-offers#emi-calculator" className="hover:text-white transition-colors">
               EMI Finance
             </a>
             <span>•</span>
-            <a href="#showrooms" className="hover:text-white transition-colors">
+            <a href="/showrooms" className="hover:text-white transition-colors">
               Showrooms
             </a>
             <span>•</span>
+            <a href="/ownership" className="hover:text-white transition-colors">Ownership</a>
+            <a href="/about" className="hover:text-white transition-colors">About</a>
+            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+            <a href="/booking-terms" className="hover:text-white transition-colors">Booking terms</a>
+            <a href="/offer-terms" className="hover:text-white transition-colors">Offer terms</a>
+            <button type="button" onClick={() => window.dispatchEvent(new Event("ars-preferences"))} className="hover:text-white transition-colors">Analytics preferences</button>
             <a href="/admin/login" className="hover:text-white transition-colors">
               Staff Portal
             </a>

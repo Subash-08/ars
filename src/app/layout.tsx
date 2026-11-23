@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://arsmotors.in"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://arsmotors.in"),
   title: "ARS Motors Salem | Authorized Kinetic Green E-Luna Dealership",
   description:
-    "Official authorized dealership for Kinetic Green E-Luna electric mopeds in Salem, Tamil Nadu. Experience the E-Luna PRO X3, Commercial Cargo & City Commuter with interactive 360° view, fuel savings calculator, instant finance, and test rides.",
+    "Official authorized dealership for Kinetic Green E-Luna electric mopeds in Salem, Tamil Nadu. Experience the E-Luna PRO X3, Commercial Cargo & City Commuter with interactive 360° view, fuel savings calculator, finance enquiries, and test rides.",
   keywords: [
     "ARS Motors Salem",
     "Kinetic Green E-Luna",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "ARS Motors Salem | Kinetic Green E-Luna Electric Dealership",
-    description: "Switch to high-earning electric mobility with E-Luna. 110 km range, 150 kg payload, only 10 paise/km. Book your test ride or token in Salem today!",
+    description: "Explore E-Luna at ARS Motors in Salem. Compare options, request a current quote and arrange a test ride.",
     url: "https://arsmotors.in",
     siteName: "ARS Motors",
     images: [
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ARS Motors Salem | Kinetic Green E-Luna",
-    description: "Authorized Kinetic Green EV Dealership in Salem. 110 km range, 150 kg payload.",
+    description: "Explore Kinetic Green E-Luna and request a test ride at ARS Motors Salem.",
     images: ["/assets/bikes/hero-action-hd.jpg"],
   },
   alternates: {
@@ -97,7 +97,7 @@ export default function RootLayout({
           "Sunday",
         ],
         opens: "09:00",
-        closes: "20:00",
+        closes: "20:30",
       },
     ],
     brand: {

@@ -1,5 +1,6 @@
 "use client";
 
+import { Dialog } from "./dialog";
 import React, { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { translations, Language } from "@/lib/translations";
@@ -50,6 +51,7 @@ export function Viewer360({ lang }: Viewer360Props) {
   const [variant, setVariant] = useState<VariantType>("pro_x3");
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>("day");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [resetKey,setResetKey]=useState(0);
   const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
 
   // 360 Degree Turntable Angle & Drag
@@ -128,7 +130,7 @@ export function Viewer360({ lang }: Viewer360Props) {
         {
           id: "battery",
           name: "2.3 kWh Li-ion Battery",
-          spec: "IP67 Waterproof • 110 km Real-World Range",
+          spec: "Battery specification to confirm • Confirm range for configuration",
           desc: "Advanced NMC cell pack with multi-stage smart BMS and standard 3-pin home charging.",
         },
         {
@@ -183,7 +185,7 @@ export function Viewer360({ lang }: Viewer360Props) {
         {
           id: "battery",
           name: "2.3 kWh Swappable/Portable Battery",
-          spec: "IP67 Waterproof Enclosure",
+          spec: "Battery specification to confirm Enclosure",
           desc: "Charge inside your shop or warehouse via regular 15A wall socket.",
         },
         {
@@ -241,29 +243,11 @@ export function Viewer360({ lang }: Viewer360Props) {
 
   const currentVariant = variantData[variant];
 
-  // Auto-rotate for photo mode
-  useEffect(() => {
-    if (!isAutoRotate || viewMode !== "photo_turntable") return;
-    const interval = setInterval(() => {
-      setRotationAngle((prev) => (prev + 1.2) % 360);
-    }, 45);
-    return () => clearInterval(interval);
-  }, [isAutoRotate, viewMode]);
-
-  // Handle Fullscreen
-  useEffect(() => {
-    if (isFullscreen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isFullscreen]);
+  useEffect(() => { const exit=(event:KeyboardEvent)=>{if(event.key==="Escape")setIsFullscreen(false);}; window.addEventListener("keydown",exit);return()=>window.removeEventListener("keydown",exit); },[]);
 
   // Reset View to Default Orientation
   const handleResetView = () => {
+    setResetKey(key=>key+1);
     setRotationAngle(45);
     setIsAutoRotate(false);
     setActiveHotspot(null);
@@ -280,9 +264,7 @@ export function Viewer360({ lang }: Viewer360Props) {
   const currentHotspot = currentVariant.features.find((f) => f.id === activeHotspot);
 
   const scrollToBooking = () => {
-    if (isFullscreen) setIsFullscreen(false);
-    const el = document.getElementById("get-in-touch");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    window.location.assign(`/book-test-ride?model=${encodeURIComponent(variantData[variant].name)}&color=${encodeURIComponent(selectedColor.name)}`);
   };
 
   // Get photo for Photo Turntable Mode
@@ -328,16 +310,16 @@ export function Viewer360({ lang }: Viewer360Props) {
     });
   };
 
-  return (
+  const content = (
     <section
-      id="360-studio"
+      id="interactive-studio"
       className={`${
         isFullscreen
-          ? "fixed inset-0 z-50 w-screen h-screen bg-neutral-950"
+          ? "fixed inset-0 z-50 w-full h-[100dvh] bg-neutral-950"
           : "py-16 md:py-24 bg-white text-neutral-900 border-t border-neutral-200"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isFullscreen ? "h-full" : ""}`}>
         {!isFullscreen && (
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-neutral-500 block mb-2">
@@ -347,7 +329,7 @@ export function Viewer360({ lang }: Viewer360Props) {
               360° Studio Configurator
             </h2>
             <p className="mt-2 text-neutral-600 text-sm sm:text-base leading-relaxed">
-              Explore the Kinetic E-Luna in 360°. Smooth scroll or drag to rotate, switch signature colorways, and inspect engineering highlights.
+              Explore the Kinetic E-Luna in 360°. Drag to rotate the illustrative model, choose colours and explore the details. Product photographs show fixed views.
             </p>
           </div>
         )}
@@ -380,9 +362,9 @@ export function Viewer360({ lang }: Viewer360Props) {
           {/* ======================================================== */}
           <div className="absolute top-4 sm:top-6 inset-x-4 sm:inset-x-8 flex flex-wrap items-center justify-between gap-3 z-30 pointer-events-auto">
             {/* Left: View Mode Toggle (3D Interactive vs HD Studio) */}
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
               <div
-                className={`p-1 rounded-full border shadow-2xs backdrop-blur-md flex items-center space-x-1 ${
+                className={`p-1 rounded-full border shadow-2xs backdrop-blur-md flex items-center space-x-1 shrink-0 ${
                   timeOfDay === "day"
                     ? "bg-white/90 border-neutral-200"
                     : "bg-black/50 border-white/15"
@@ -399,10 +381,10 @@ export function Viewer360({ lang }: Viewer360Props) {
                       ? "text-neutral-600 hover:text-black"
                       : "text-white/70 hover:text-white"
                   }`}
-                  title="3D WebGL Orbit Model matching reference"
+                  title="Interactive illustrative vehicle model"
                 >
                   <Box className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>3D Model 360°</span>
+                  <span>3D Model</span>
                 </button>
 
                 <button
@@ -416,16 +398,16 @@ export function Viewer360({ lang }: Viewer360Props) {
                       ? "text-neutral-600 hover:text-black"
                       : "text-white/70 hover:text-white"
                   }`}
-                  title="High-definition studio render of your product"
+                  title="Product photographs, shown from fixed angles"
                 >
                   <ImageIcon className="w-3.5 h-3.5 text-blue-500" />
-                  <span>HD Product Studio</span>
+                  <span>Product Photos</span>
                 </button>
               </div>
 
               {/* Model Variant Pills */}
               <div
-                className={`hidden lg:flex p-1 rounded-full border shadow-2xs backdrop-blur-md items-center space-x-1 ${
+                className={`flex p-1 rounded-full border shadow-2xs backdrop-blur-md items-center space-x-1 ${
                   timeOfDay === "day"
                     ? "bg-white/90 border-neutral-200"
                     : "bg-black/50 border-white/15"
@@ -491,8 +473,8 @@ export function Viewer360({ lang }: Viewer360Props) {
 
               {/* Auto Spin Toggle */}
               <button
-                onClick={() => setIsAutoRotate(!isAutoRotate)}
-                className={`hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all shadow-2xs ${
+                onClick={() => {setViewMode("3d_model");setIsAutoRotate(!isAutoRotate);}}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all shadow-2xs ${
                   isAutoRotate
                     ? "bg-emerald-500 text-black border-emerald-500 font-bold"
                     : timeOfDay === "day"
@@ -535,7 +517,7 @@ export function Viewer360({ lang }: Viewer360Props) {
           {/* ======================================================== */}
           {/* CENTER STAGE: 3D WEBGL MODEL OR HD TURNTABLE PHOTO       */}
           {/* ======================================================== */}
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <div className="absolute top-[156px] sm:top-[106px] bottom-[164px] sm:bottom-[116px] inset-x-0 z-10 flex items-center justify-center">
             {/* Turntable Pedestal Base under Vehicle */}
             <div
               className={`absolute bottom-[10%] sm:bottom-[9%] w-[75%] max-w-2xl h-24 sm:h-28 rounded-[100%] transition-all duration-700 pointer-events-none ${
@@ -558,6 +540,7 @@ export function Viewer360({ lang }: Viewer360Props) {
             {viewMode === "3d_model" ? (
               <div className="relative w-full h-full">
                 <Eluna3DCanvas
+                  resetKey={resetKey}
                   variant={variant}
                   colorHex={selectedColor.hex}
                   colorName={selectedColor.name}
@@ -571,7 +554,7 @@ export function Viewer360({ lang }: Viewer360Props) {
                 />
 
                 {/* Floating Hint */}
-                <div className="absolute top-16 sm:top-20 inset-x-0 flex justify-center pointer-events-none z-20">
+                <div className="absolute top-1 inset-x-0 hidden sm:flex justify-center pointer-events-none z-20">
                   <div
                     className={`px-3.5 py-1.5 rounded-full text-[11px] font-medium backdrop-blur-md border shadow-xs transition-opacity duration-500 flex items-center space-x-1.5 ${
                       timeOfDay === "day"
@@ -580,25 +563,25 @@ export function Viewer360({ lang }: Viewer360Props) {
                     }`}
                   >
                     <Sparkles className="w-3 h-3 text-emerald-500" />
-                    <span>Scroll or drag to rotate 360° in 3D • Ctrl+scroll to zoom</span>
+                    <span>Drag to rotate · Arrow keys to rotate/zoom · Home to reset</span>
                   </div>
                 </div>
               </div>
             ) : (
               /* MODE 2: HD PRODUCT STUDIO TURNTABLE (Matching User Reference Image) */
               <div
-                onPointerDown={handlePhotoPointerDown}
-                onPointerMove={handlePhotoPointerMove}
-                onPointerUp={handlePhotoPointerUp}
-                onPointerLeave={handlePhotoPointerUp}
-                onWheel={handlePhotoWheel}
+
+
+
+
+
                 className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
               >
                 <div
                   className="relative w-full max-w-2xl h-full flex items-center justify-center transition-transform duration-75"
                   style={{
                     perspective: "1000px",
-                    transform: `rotateY(${((rotationAngle - 45) * 0.25).toFixed(2)}deg)`,
+                    transform: "none",
                   }}
                 >
                   <img
@@ -616,7 +599,7 @@ export function Viewer360({ lang }: Viewer360Props) {
                 </div>
 
                 {/* Floating Hint */}
-                <div className="absolute top-16 sm:top-20 inset-x-0 flex justify-center pointer-events-none z-20">
+                <div className="absolute top-1 inset-x-0 hidden sm:flex justify-center pointer-events-none z-20">
                   <div
                     className={`px-3.5 py-1.5 rounded-full text-[11px] font-medium backdrop-blur-md border shadow-xs transition-opacity duration-500 flex items-center space-x-1.5 ${
                       timeOfDay === "day"
@@ -625,7 +608,7 @@ export function Viewer360({ lang }: Viewer360Props) {
                     }`}
                   >
                     <Sparkles className="w-3 h-3 text-blue-500" />
-                    <span>Scroll or drag to rotate turntable • Pick colors below</span>
+                    <span>Product photograph · Pick a colour below</span>
                   </div>
                 </div>
               </div>
@@ -698,6 +681,7 @@ export function Viewer360({ lang }: Viewer360Props) {
                           }`}
                           style={{ backgroundColor: c.hex }}
                           title={c.name}
+                          aria-pressed={selectedColor.id === c.id}
                         >
                           {selectedColor.id === c.id && (
                             <Check className="w-3.5 h-3.5 text-white mix-blend-difference" />
@@ -725,7 +709,7 @@ export function Viewer360({ lang }: Viewer360Props) {
                     <button
                       key={preset.label}
                       onClick={() => {
-                        setRotationAngle(preset.angle);
+                        setViewMode("3d_model");setRotationAngle(preset.angle);
                         setIsAutoRotate(false);
                       }}
                       className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all ${
@@ -742,12 +726,12 @@ export function Viewer360({ lang }: Viewer360Props) {
                 <div className="flex-1 flex items-center space-x-2">
                   <span className="text-[10px] font-mono text-neutral-400">0°</span>
                   <input
-                    type="range"
+                    type="range" aria-label="Studio viewing angle"
                     min="0"
                     max="360"
                     value={Math.round(rotationAngle)}
                     onChange={(e) => {
-                      setRotationAngle(Number(e.target.value));
+                      setViewMode("3d_model");setRotationAngle(Number(e.target.value));
                       setIsAutoRotate(false);
                     }}
                     className="flex-grow accent-neutral-950 dark:accent-emerald-400 cursor-pointer h-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none"
@@ -771,4 +755,5 @@ export function Viewer360({ lang }: Viewer360Props) {
       </div>
     </section>
   );
+  return isFullscreen ? <Dialog title="Fullscreen vehicle studio" onClose={()=>setIsFullscreen(false)}>{content}</Dialog> : content;
 }

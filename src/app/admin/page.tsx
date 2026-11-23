@@ -133,20 +133,13 @@ export default function AdminDashboardPage() {
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
 
-  // Check auth session
+  const [loadError, setLoadError] = useState("");
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const auth = sessionStorage.getItem("ars_admin_auth");
-      if (!auth) {
-        router.push("/admin/login");
-        return;
-      }
-    }
-    fetchData();
+    fetch("/api/auth/session").then(res => { if (!res.ok) router.replace("/admin/login"); else fetchData(); }).catch(() => { setLoadError("Could not verify your session. Please reload."); setIsLoading(false); });
   }, [router]);
 
   const fetchData = async () => {
-    setIsLoading(true);
+    setIsLoading(true); setLoadError("");
     try {
       const [leadsRes, statsRes, productsRes, offersRes, bannersRes] =
         await Promise.all([
@@ -157,6 +150,8 @@ export default function AdminDashboardPage() {
           fetch("/api/admin/banners").catch(() => null),
         ]);
 
+      if (leadsRes.status === 401) { router.replace("/admin/login"); return; }
+      if (!leadsRes.ok || !statsRes.ok || !productsRes?.ok || !offersRes?.ok || !bannersRes?.ok) throw new Error("Data unavailable");
       const leadsData = await leadsRes.json();
       const statsData = await statsRes.json();
 
@@ -178,30 +173,17 @@ export default function AdminDashboardPage() {
         if (banData.success) setBanners(banData.banners);
       }
     } catch {
-      // Fallback
+      setLoadError("Some data could not be loaded. Please retry; displayed data may be out of date.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleStatusChange = async (leadId: string, newStatus: string) => {
-    try {
-      await fetch(`/api/leads/${leadId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      setLeads((prev) =>
-        prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
-      );
-      if (selectedLead?.id === leadId) {
-        setSelectedLead((prev) => (prev ? { ...prev, status: newStatus } : null));
-      }
-    } catch {
-      setLeads((prev) =>
-        prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
-      );
-    }
+    try { const res=await fetch(`/api/leads/${leadId}`, {method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:newStatus})}); if(!res.ok) throw new Error();
+      setLeads(prev=>prev.map(l=>l.id===leadId?{...l,status:newStatus}:l));
+      if(selectedLead?.id===leadId)setSelectedLead(prev=>prev?{...prev,status:newStatus}:null);
+    } catch { alert("Status was not saved. Please retry."); }
   };
 
   // 1-Click WhatsApp handler
@@ -219,12 +201,8 @@ export default function AdminDashboardPage() {
     const headers = [
       "Name,Phone,Area,Color,Inquiry Type,Model,Preferred Date,Time Slot,Branch,Status,Message,Source,Date\n",
     ];
-    const rows = leads.map(
-      (l) =>
-        `"${l.name}","${l.phone}","${l.cityArea}","${l.preferredColor}","${l.inquiryType}","${l.useCase}","${l.preferredDate || ""}","${l.preferredTime || ""}","${l.assignedBranch}","${l.status}","${(l.message || "").replace(/"/g, '""')}","${l.source}","${new Date(
-          l.createdAt
-        ).toLocaleDateString()}"\n`
-    );
+    const cell = (value: unknown) => { const text=String(value ?? ""); const safe=/^[\s]*[=+@-]/.test(text) ? "'"+text : text; return `"${safe.replace(/"/g,'""')}"`; };
+    const rows=leads.map(l=>[l.name,l.phone,l.cityArea,l.preferredColor,l.inquiryType,l.useCase,l.preferredDate,l.preferredTime,l.assignedBranch,l.status,l.message,l.source,new Date(l.createdAt).toLocaleDateString()].map(cell).join(",")+"\n");
     const blob = new Blob([...headers, ...rows], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -243,6 +221,7 @@ export default function AdminDashboardPage() {
           body: JSON.stringify(productData),
         });
         const d = await res.json();
+        if (!res.ok || !d.success) throw new Error(d.error || "Operation failed");
         if (d.success) {
           setProducts((prev) =>
             prev.map((p) => (p.id === productData.id ? d.product : p))
@@ -255,6 +234,7 @@ export default function AdminDashboardPage() {
           body: JSON.stringify(productData),
         });
         const d = await res.json();
+        if (!res.ok || !d.success) throw new Error(d.error || "Operation failed");
         if (d.success) {
           setProducts((prev) => [...prev, d.product]);
         }
@@ -269,7 +249,8 @@ export default function AdminDashboardPage() {
   const deleteProduct = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
     try {
-      await fetch(`/api/admin/products?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/products?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Deletion was not saved");
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (err: any) {
       alert("Error deleting product: " + err.message);
@@ -286,6 +267,7 @@ export default function AdminDashboardPage() {
           body: JSON.stringify(offerData),
         });
         const d = await res.json();
+        if (!res.ok || !d.success) throw new Error(d.error || "Operation failed");
         if (d.success) {
           setOffers((prev) =>
             prev.map((o) => (o.id === offerData.id ? d.offer : o))
@@ -298,6 +280,7 @@ export default function AdminDashboardPage() {
           body: JSON.stringify(offerData),
         });
         const d = await res.json();
+        if (!res.ok || !d.success) throw new Error(d.error || "Operation failed");
         if (d.success) {
           setOffers((prev) => [...prev, d.offer]);
         }
@@ -312,7 +295,8 @@ export default function AdminDashboardPage() {
   const deleteOffer = async (id: string) => {
     if (!confirm("Are you sure you want to delete this offer?")) return;
     try {
-      await fetch(`/api/admin/offers?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/offers?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Deletion was not saved");
       setOffers((prev) => prev.filter((o) => o.id !== id));
     } catch (err: any) {
       alert("Error deleting offer: " + err.message);
@@ -331,7 +315,7 @@ export default function AdminDashboardPage() {
     const matchesInquiry =
       inquiryFilter === "ALL" ||
       (inquiryFilter === "TEST_DRIVE" && l.inquiryType.includes("Test Drive")) ||
-      (inquiryFilter === "TOKEN" && l.inquiryType.includes("1000")) ||
+      (inquiryFilter === "TOKEN" && l.inquiryType === "Reservation Enquiry") ||
       (inquiryFilter === "ENQUIRY" && l.inquiryType.includes("Enquiry"));
 
     return matchesSearch && matchesStatus && matchesBranch && matchesInquiry;
@@ -369,6 +353,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#090b0e] text-white flex flex-col md:flex-row">
+      {loadError && <div role="alert" className="fixed top-4 left-4 right-4 z-[100] rounded-xl bg-red-50 border border-red-200 p-4 text-red-900 text-sm">{loadError} <button className="underline" onClick={fetchData}>Retry</button></div>}
       {/* SIDEBAR NAVIGATION (Desktop persistent, Mobile overlay) */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-72 bg-[#0c0f17] border-r border-white/[0.08] flex flex-col justify-between shrink-0 transition-transform duration-300 md:static md:translate-x-0 ${
@@ -377,7 +362,8 @@ export default function AdminDashboardPage() {
       >
         <div className="flex flex-col h-full justify-between">
           <div>
-            {/* Sidebar Header / Brand */}
+
+      {/* Sidebar Header / Brand */}
             <div className="p-6 border-b border-white/[0.08] flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-xs">
@@ -534,8 +520,8 @@ export default function AdminDashboardPage() {
               </div>
 
               <button
-                onClick={() => {
-                  sessionStorage.removeItem("ars_admin_auth");
+                onClick={async () => {
+                  await fetch("/api/auth/logout", {method:"POST"});
                   router.push("/admin/login");
                 }}
                 className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors shrink-0"
@@ -619,15 +605,15 @@ export default function AdminDashboardPage() {
             <div className="p-5 rounded-2xl bg-[#121620] border border-white/[0.08] shadow-xs">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                  Token Bookings @ ₹1k
+                  Reservation Enquiries
                 </span>
                 <Sparkles className="w-4 h-4 text-amber-400" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-amber-300 font-mono">
-                {leads.filter((l) => l.inquiryType.includes("1000") || l.status === "BOOKED_1000").length}
+                {leads.filter((l) => l.inquiryType === "Reservation Enquiry").length}
               </div>
               <span className="text-[11px] text-slate-400 font-semibold mt-1 block">
-                Priority vehicle slots
+                Requests only · no payment collected
               </span>
             </div>
 
@@ -654,10 +640,10 @@ export default function AdminDashboardPage() {
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
-                {stats?.conversionRate || "7.1"}%
+                {stats?.conversionRate == null ? "Not measured" : `${stats.conversionRate}%`}
               </div>
               <span className="text-[11px] text-emerald-400 font-semibold mt-1 block">
-                Above Salem industry average
+                Conversion rate is not measured
               </span>
             </div>
           </div>
@@ -687,7 +673,7 @@ export default function AdminDashboardPage() {
                   >
                     <option value="ALL">All Inquiry Types</option>
                     <option value="TEST_DRIVE">Test Rides Only</option>
-                    <option value="TOKEN">Token Bookings (@ ₹1,000)</option>
+                    <option value="TOKEN">Reservation Enquiries</option>
                     <option value="ENQUIRY">General Enquiries</option>
                   </select>
 
@@ -712,7 +698,6 @@ export default function AdminDashboardPage() {
                     <option value="NEW">New</option>
                     <option value="CONTACTED">Contacted</option>
                     <option value="TEST_DRIVE_SCHEDULED">Test Drive</option>
-                    <option value="BOOKED_1000">Booked @ 1000</option>
                     <option value="CONVERTED">Converted</option>
                     <option value="LOST">Lost</option>
                   </select>
@@ -781,7 +766,7 @@ export default function AdminDashboardPage() {
                           <td className="p-4">
                             <span
                               className={`px-2 py-0.5 rounded-full text-[10px] font-bold inline-block mb-1 ${
-                                lead.inquiryType.includes("1000")
+                                lead.inquiryType === "Reservation Enquiry"
                                   ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
                                   : lead.inquiryType.includes("Enquiry")
                                   ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
@@ -811,7 +796,6 @@ export default function AdminDashboardPage() {
                               <option value="NEW">NEW</option>
                               <option value="CONTACTED">CONTACTED</option>
                               <option value="TEST_DRIVE_SCHEDULED">TEST DRIVE</option>
-                              <option value="BOOKED_1000">BOOKED @ 1000</option>
                               <option value="CONVERTED">CONVERTED</option>
                               <option value="LOST">LOST</option>
                             </select>
@@ -866,7 +850,7 @@ export default function AdminDashboardPage() {
                       payload: "150 kg",
                       battery: "2.3 kWh Advanced Li-ion",
                       motor: "1.2 kW BLDC",
-                      warranty: "5 Years / 50,000 km",
+                      warranty: "Confirm component coverage with showroom",
                       image: "/assets/bikes/studio-yellow-hd.jpg",
                       description: "",
                       isPublished: true,
@@ -977,7 +961,7 @@ export default function AdminDashboardPage() {
                       id: "",
                       title: "",
                       badge: "Special Promotion",
-                      discount: "Book @ ₹1,000",
+                      discount: "",
                       validTill: "Limited Period",
                       description: "",
                       terms: "T&C Apply",

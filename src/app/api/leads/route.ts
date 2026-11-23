@@ -1,136 +1,41 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-// In-memory fallback if Prisma database engine is initializing
-let fallbackLeads: any[] = [
-  {
-    id: "lead-demo-1",
-    name: "Murugan S",
-    phone: "9842712345",
-    email: "murugan.salem@gmail.com",
-    cityArea: "Seelanaickenpatti, Salem",
-    preferredColor: "Pearl Yellow",
-    inquiryType: "Token Booking @ 1000",
-    useCase: "Commercial Cargo",
-    assignedBranch: "Seelanaickenpatti",
-    status: "BOOKED_1000",
-    notes: "Requires home delivery with detachable rear carrier setup.",
-    source: "Flyer QR Code",
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-  },
-  {
-    id: "lead-demo-2",
-    name: "Kavitha R",
-    phone: "9443298765",
-    email: null,
-    cityArea: "Elampillai, Salem",
-    preferredColor: "Mulberry Red",
-    inquiryType: "Test Drive",
-    useCase: "Personal",
-    assignedBranch: "Madathur",
-    status: "TEST_DRIVE_SCHEDULED",
-    notes: "Wants showroom test drive on Saturday 4 PM.",
-    source: "Website Direct",
-    createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-  },
-  {
-    id: "lead-demo-3",
-    name: "Dhanasekar P",
-    phone: "9789012345",
-    email: null,
-    cityArea: "Suramangalam, Salem",
-    preferredColor: "Night Star Black",
-    inquiryType: "Exchange",
-    useCase: "Personal",
-    assignedBranch: "Seelanaickenpatti",
-    status: "CONTACTED",
-    notes: "Exchanging 2018 TVS XL 100 for extra trade-in bonus.",
-    source: "Google Search",
-    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-  },
-];
-
-export async function GET(req: Request) {
-  try {
-    const leads = await prisma.lead.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json({ success: true, leads });
-  } catch {
-    // Return fallback leads if local sqlite hasn't completed prisma generate
-    return NextResponse.json({ success: true, leads: fallbackLeads });
-  }
+import { requireAdmin, sameOrigin } from "@/lib/auth";
+import { rateLimit, readJson, unavailable } from "@/lib/request";
+import { validateLead } from "@/lib/lead-validation";
+export const dynamic = "force-dynamic";
+export async function GET(req: Request) { const denied = requireAdmin(req); if (denied)
+    return denied; try {
+    return NextResponse.json({ success: true, leads: await prisma.lead.findMany({ orderBy: { createdAt: "desc" } }) }, { headers: { "Cache-Control": "no-store" } });
 }
-
+catch {
+    return unavailable();
+} }
 export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const {
-      name,
-      phone,
-      email,
-      cityArea,
-      preferredColor,
-      inquiryType,
-      useCase,
-      exchangeBrand,
-      assignedBranch,
-      preferredDate,
-      preferredTime,
-      message,
-      source,
-    } = body;
-
-    if (!name || !phone) {
-      return NextResponse.json(
-        { success: false, error: "Name and phone are required" },
-        { status: 400 }
-      );
-    }
-
+    if (!sameOrigin(req))
+        return NextResponse.json({ success: false, error: "Invalid request origin" }, { status: 403 });
+    if (rateLimit("leads-global", 60, 60000))
+        return NextResponse.json({ success: false, error: "Too many requests. Please wait a minute." }, { status: 429 });
+    let data;
     try {
-      const newLead = await prisma.lead.create({
-        data: {
-          name,
-          phone,
-          email: email || null,
-          cityArea: cityArea || "Salem",
-          preferredColor: preferredColor || "Pearl Yellow",
-          inquiryType: inquiryType || "Test Drive",
-          useCase: useCase || "Personal",
-          exchangeBrand: exchangeBrand || null,
-          assignedBranch: assignedBranch || "Seelanaickenpatti",
-          preferredDate: preferredDate || null,
-          preferredTime: preferredTime || null,
-          message: message || null,
-          source: source || "Website Direct",
-          status: inquiryType?.includes("1000") ? "BOOKED_1000" : "NEW",
-        },
-      });
-      return NextResponse.json({ success: true, lead: newLead });
-    } catch {
-      const fallbackItem = {
-        id: "lead-" + Date.now(),
-        name,
-        phone,
-        email: email || null,
-        cityArea: cityArea || "Salem",
-        preferredColor: preferredColor || "Pearl Yellow",
-        inquiryType: inquiryType || "Test Drive",
-        useCase: useCase || "Personal",
-        exchangeBrand: exchangeBrand || null,
-        assignedBranch: assignedBranch || "Seelanaickenpatti",
-        preferredDate: preferredDate || null,
-        preferredTime: preferredTime || null,
-        message: message || null,
-        source: source || "Website Direct",
-        status: inquiryType?.includes("1000") ? "BOOKED_1000" : "NEW",
-        createdAt: new Date().toISOString(),
-      };
-      fallbackLeads.unshift(fallbackItem);
-      return NextResponse.json({ success: true, lead: fallbackItem });
+        const body = await readJson(req);
+        if (body.consent !== true)
+            throw new Error("Please agree to contact about your request.");
+        if (body.website)
+            throw new Error("Invalid request.");
+        data = validateLead(body);
     }
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
-  }
+    catch (error) {
+        return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Invalid request" }, { status: 400 });
+    }
+    try {
+        const recent = await prisma.lead.findFirst({ where: { ...data, useCase: data.useCase || "Personal", cityArea: data.cityArea || "Salem", source: data.source || "Website Direct", ...Object.fromEntries(["email", "preferredColor", "exchangeBrand", "preferredDate", "preferredTime", "message", "utmSource", "utmMedium", "utmCampaign"].map(key => [key, data[key] || null])), createdAt: { gte: new Date(Date.now() - 60000) } } });
+        if (recent)
+            return NextResponse.json({ success: true, reference: recent.id }, { headers: { "Cache-Control": "no-store" } });
+        const lead = await prisma.lead.create({ data: { ...data, status: "NEW", notes: `Contact permission recorded ${new Date().toISOString()}` } });
+        return NextResponse.json({ success: true, reference: lead.id }, { status: 201, headers: { "Cache-Control": "no-store" } });
+    }
+    catch {
+        return unavailable();
+    }
 }

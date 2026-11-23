@@ -23,52 +23,16 @@ interface OfferItem {
 export function OffersSection({ lang, onClaimOffer }: OffersSectionProps) {
   const t = translations[lang];
 
-  const defaultOffers: OfferItem[] = [
-    {
-      id: "off-1",
-      title: "Salem Priority Token Booking",
-      badge: "Priority Allocation",
-      discount: "Book @ ₹1,000 Only",
-      validTill: "Valid till Dec 31, 2026",
-      description: "Secure your vehicle delivery slot with direct factory priority allocation from ARS Motors Salem. 100% refundable prior to invoice.",
-      terms: "100% Refundable prior to vehicle invoice. T&C Apply.",
-      isActive: true,
-    },
-    {
-      id: "off-2",
-      title: "Two-Wheeler Exchange Bonus",
-      badge: "Exchange Special",
-      discount: "Up to ₹5,000 Extra Value",
-      validTill: "Limited Period Offer",
-      description: "Exchange any old petrol moped or motorcycle (TVS XL, Splendor, Activa, etc.) for fair market valuation plus up to ₹5,000 bonus.",
-      terms: "Subject to physical evaluation at Salem showroom.",
-      isActive: true,
-    },
-    {
-      id: "off-3",
-      title: "Complimentary Safety Delivery Kit",
-      badge: "Free On Delivery",
-      discount: "Free ISI Helmet & Toolkit",
-      validTill: "Active for All Bookings",
-      description: "Receive a brand-new ISI certified safety helmet and essential roadside maintenance toolkit with every vehicle delivery.",
-      terms: "One complimentary kit per registered vehicle.",
-      isActive: true,
-    },
-  ];
-
-  const [offers, setOffers] = useState<OfferItem[]>(defaultOffers);
+  const [offers, setOffers] = useState<OfferItem[]>([]);
+  const [state, setState] = useState("loading");
 
   useEffect(() => {
-    fetch("/api/offers")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.offers && data.offers.length > 0) {
-          setOffers(data.offers);
-        }
-      })
-      .catch(() => {
-        // Fallback to default offers
-      });
+    const controller = new AbortController();
+    fetch("/api/offers", { signal: controller.signal })
+      .then(async res => { if (!res.ok) throw new Error(); return res.json(); })
+      .then(data => { setOffers(data.offers || []); setState("ready"); })
+      .catch(() => { if (!controller.signal.aborted) setState("error"); });
+    return () => controller.abort();
   }, []);
 
   return (
@@ -83,10 +47,14 @@ export function OffersSection({ lang, onClaimOffer }: OffersSectionProps) {
             Special Dealership Offers
           </h2>
           <p className="mt-3 text-neutral-600 text-sm sm:text-base leading-relaxed">
-            Take advantage of exclusive incentives, priority token allocations, and exchange bonuses available directly at ARS Motors.
+            Ask our team to confirm the eligibility, availability and conditions of any listed offer. An enquiry does not reserve or redeem an offer.
           </p>
         </div>
 
+        {state === "loading" && <p role="status" className="text-center text-sm text-neutral-500 mb-6">Checking current offers…</p>}
+        {state === "error" && <p role="status" className="text-center text-sm text-neutral-600 mb-6">We couldn’t load offers. Please contact the showroom for current details.</p>}
+        {state === "ready" && offers.length === 0 && <p className="text-center text-sm text-neutral-600 mb-6">No current offers are listed. Contact us for a written quote.</p>}
+        <p className="text-center text-xs text-neutral-500 mb-8">No online payment is collected. <a href="/offer-terms" className="underline">Offer information</a> · <a href="/booking-terms" className="underline">Reservation enquiries</a></p>
         {/* Offers Cards Grid - Premium Minimalist Layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {offers
@@ -164,7 +132,7 @@ export function OffersSection({ lang, onClaimOffer }: OffersSectionProps) {
                         : "bg-neutral-950 hover:bg-neutral-800 text-white"
                     }`}
                   >
-                    <span>Claim Offer</span>
+                    <span>Enquire About Offer</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
