@@ -1,0 +1,112 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("sales_executive")
+  createdAt    DateTime @default(now())
+}
+
+model Lead {
+  id              String   @id @default(cuid())
+  name            String
+  phone           String
+  email           String?
+  cityArea        String   @default("Salem")
+  preferredColor  String?  // Mulberry Red, Pearl Yellow, Night Star Black, Sparkling Blue, Oceanic Green
+  inquiryType     String   @default("Test Drive") // "Test Drive", "Token Booking @ 1000", "Brochure Download", "EMI Inquiry", "Exchange"
+  useCase         String   @default("Personal") // "Personal", "Commercial Cargo"
+  exchangeBrand   String?  // e.g. "TVS XL", "Hero Splendor"
+  assignedBranch  String   @default("Seelanaickenpatti") // "Seelanaickenpatti" or "Madathur"
+  preferredDate   String?  // e.g. "2026-11-25"
+  preferredTime   String?  // e.g. "Morning (10:00 AM - 01:00 PM)"
+  message         String?  // General enquiry or question
+  status          String   @default("NEW") // NEW, CONTACTED, TEST_DRIVE_SCHEDULED, BOOKED_1000, CONVERTED, LOST
+  notes           String?
+  source          String   @default("Website Direct") // Flyer QR, Google, WhatsApp, Direct
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String   // "Kinetic E-Luna PRO X3"
+  slug        String   @unique
+  category    String   // "Personal", "Commercial Cargo", "City Commuter"
+  price       String   // "₹69,990*"
+  range       String   // "110 km"
+  speed       String   // "50 km/h"
+  payload     String   // "150 kg"
+  battery     String   // "2.3 kWh Advanced Li-ion"
+  motor       String   // "1.2 kW BLDC / 2.2 kW Peak"
+  warranty    String   // "5 Years / 50,000 km"
+  image       String   // "/assets/bikes/hires-yellow.jpg"
+  description String
+  isPublished Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Offer {
+  id          String   @id @default(cuid())
+  title       String   // "Salem Launch Pre-Booking Benefit"
+  badge       String   // "Limited Period Offer"
+  discount    String   // "₹1,000 Priority Token Booking"
+  validTill   String   // "Valid till Nov 30, 2026"
+  description String   // "Reserve your E-Luna delivery slot with priority allocation"
+  terms       String?  // "T&C Apply"
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Banner {
+  id          String   @id @default(cuid())
+  headline    String
+  subheadline String
+  ctaText     String   @default("Book Test Ride")
+  ctaLink     String   @default("#get-in-touch")
+  image       String
+  tag1        String?
+  tag2        String?
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PageView {
+  id          String   @id @default(cuid())
+  path        String   @default("/")
+  referrer    String?
+  userAgent   String?
+  deviceType  String?  // Mobile, Desktop, Tablet
+  ipHash      String?  // Anonymized unique visitor identifier
+  utmSource   String?
+  utmCampaign String?
+  createdAt   DateTime @default(now())
+}

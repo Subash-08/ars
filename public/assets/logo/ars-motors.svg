@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <defs>
+    <!-- Circle Green Gradient -->
+    <linearGradient id="arsCircleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#4ade80" />
+      <stop offset="50%" stopColor="#22c55e" />
+      <stop offset="100%" stopColor="#15803d" />
+    </linearGradient>
+    
+    <!-- ARS Blue Gradient -->
+    <linearGradient id="arsBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#00a3e0" />
+      <stop offset="100%" stopColor="#0077c8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Green Ring with Plug Extension -->
+  <!-- Outer Ring with open break for the plug -->
+  <path
+    d="M 330 170 A 150 150 0 1 1 310 90"
+    fill="none"
+    stroke="url(#arsCircleGrad)"
+    stroke-width="26"
+    stroke-linecap="round"
+  />
+
+  <!-- Plug Cable extending to the right -->
+  <path
+    d="M 310 90 C 340 90, 360 175, 430 175 L 460 175"
+    fill="none"
+    stroke="url(#arsCircleGrad)"
+    stroke-width="22"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- 2-Pin Plug Body -->
+  <rect x="460" y="150" width="46" height="50" rx="8" fill="#70b828" />
+  <!-- Plug Pins -->
+  <rect x="506" y="159" width="30" height="11" rx="2" fill="#70b828" />
+  <rect x="506" y="180" width="30" height="11" rx="2" fill="#70b828" />
+
+  <!-- ARS Bold Text inside circle -->
+  <g transform="translate(65, 80)">
+    <!-- Letter A -->
+    <path
+      d="M 25 125 L 75 10 L 115 10 L 165 125 L 125 125 L 112 92 L 68 92 L 55 125 Z M 79 66 L 101 66 L 90 38 Z"
+      fill="url(#arsBlueGrad)"
+    />
+    
+    <!-- Letter R -->
+    <path
+      d="M 175 10 L 235 10 C 265 10, 280 25, 280 50 C 280 72, 265 85, 240 88 L 285 125 L 245 125 L 208 92 L 208 125 L 175 125 Z M 208 36 L 208 68 L 232 68 C 245 68, 252 62, 252 52 C 252 42, 245 36, 232 36 Z"
+      fill="url(#arsBlueGrad)"
+    />
+
+    <!-- Letter S with Speed Cuts -->
+    <path
+      d="M 345 35 C 335 18, 320 10, 298 10 C 272 10, 255 24, 255 46 C 255 78, 305 76, 305 96 C 305 105, 296 110, 282 110 C 265 110, 250 100, 242 88 L 222 108 C 235 124, 256 135, 284 135 C 315 135, 335 118, 335 94 C 335 60, 285 64, 285 46 C 285 38, 292 34, 302 34 C 314 34, 324 40, 330 50 Z"
+      fill="url(#arsBlueGrad)"
+    />
+
+    <!-- S diagonal motion slices -->
+    <line x1="228" y1="124" x2="242" y2="92" stroke="#ffffff" stroke-width="5" />
+    <line x1="242" y1="124" x2="256" y2="92" stroke="#ffffff" stroke-width="5" />
+    <line x1="256" y1="124" x2="270" y2="92" stroke="#ffffff" stroke-width="5" />
+  </g>
+
+  <!-- Lime Green MOTORS Box -->
+  <g transform="translate(175, 215)">
+    <rect x="0" y="0" width="375" height="60" rx="8" fill="#70b828" />
+    <text
+      x="187"
+      y="43"
+      font-family="'Arial Black', 'Inter', sans-serif"
+      font-weight="900"
+      font-size="34"
+      fill="#ffffff"
+      letter-spacing="14"
+      text-anchor="middle"
+    >
+      MOTORS
+    </text>
+  </g>
+</svg>
