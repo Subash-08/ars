@@ -3,6 +3,7 @@ export type PublicProduct = {
     id: string;
     name: string;
     slug: string;
+    category: string;
     price: string;
     range: string;
     speed: string;
@@ -23,4 +24,8 @@ export async function getCatalog(): Promise<{
     catch {
         return { products: [], unavailable: true };
     }
+}
+
+export async function getProduct(slug: string) {
+  return prisma.product.findFirst({ where: { slug, isPublished: true } });
 }

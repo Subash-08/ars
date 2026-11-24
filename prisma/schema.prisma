@@ -110,3 +110,21 @@ model PageView {
   utmCampaign String?
   createdAt   DateTime @default(now())
 }
+
+model CustomerStory {
+  id           String   @id @default(cuid())
+  customerName String
+  location     String
+  testimonial  String
+  kind         String   @default("delivery")
+  imagePath    String?
+  image        Bytes?
+  imageType    String?
+  order        Int      @default(0)
+  isActive     Boolean  @default(false)
+  isDemo       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([kind, isActive, order])
+}

@@ -28,6 +28,9 @@ async function request(url,method='GET',body,authenticated=false,origin=base){co
 async function expect(url,status,method='GET',body,authenticated=false,origin){const res=await request(url,method,body,authenticated,origin);assert.equal(res.status,status,`${method} ${url}`);checks++;return res;}
 (async()=>{try{
   await setupDatabase();
+  const setup = spawnSync(process.execPath, ['prisma/setup-customer-stories.cjs', '--demo'], {cwd, env, encoding:'utf8'});
+  assert.equal(setup.status, 0, setup.stderr);
+
   server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3100'],{cwd,env,stdio:['ignore',log,log],windowsHide:true});
   let ready=false;for(let i=0;i<60;i++){try{const res=await fetch(base+'/privacy');if(res.ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,500));}assert.ok(ready,'server started');
   for(const url of ['/','/e-luna','/finance-offers','/ownership','/showrooms','/about','/book-test-ride','/privacy','/booking-terms','/offer-terms','/sitemap.xml','/robots.txt'])await expect(url,200);
@@ -57,6 +60,40 @@ async function expect(url,status,method='GET',body,authenticated=false,origin){c
   offers=await (await expect('/api/offers',200)).json();assert.equal(offers.offers.length,1);
   await expect('/api/admin/offers',200,'PUT',{id:addedOffer.offer.id,isActive:false},true);
   offers=await (await expect('/api/offers',200)).json();assert.deepEqual(offers.offers,[]);
+  await expect('/api/admin/customer-stories',401);
+  const storiesResponse = await expect('/api/admin/customer-stories',200,'GET',undefined,true);
+  assert.equal((await storiesResponse.json()).stories.length,9);
+  const homepage = await (await request('/')).text();
+  assert.match(homepage,/Customer delivery stories/);
+  assert.match(homepage,/Demo quote/);
+  const storyForm = new FormData();
+  storyForm.set('customerName','QA Customer');
+  storyForm.set('location','Salem');
+  storyForm.set('testimonial','An isolated workflow test.');
+  storyForm.set('kind','delivery');
+  storyForm.set('isActive','false');
+  const upload = fs.readFileSync(path.join(cwd,'public/assets/customer-stories/showroom-red.webp'));
+  storyForm.set('image',new Blob([upload],{type:'image/webp'}),'story.webp');
+  const savedStory = await fetch(base+'/api/admin/customer-stories',{method:'POST',headers:{Origin:base,Cookie:cookie},body:storyForm});
+  assert.equal(savedStory.status,200,await savedStory.text()); checks++;
+  const getStories = async () => (await (await request('/api/admin/customer-stories','GET',undefined,true)).json()).stories;
+  const createdStory = (await getStories()).find(story=>story.customerName==='QA Customer');
+  assert.ok(createdStory);
+  await expect(createdStory.imageUrl,404);
+  await expect(createdStory.imageUrl,200,'GET',undefined,true);
+  await expect('/api/admin/customer-stories',200,'PATCH',{id:createdStory.id,isActive:true},true);
+  const publicPhoto = await expect(createdStory.imageUrl,200);
+  assert.equal(publicPhoto.headers.get('content-type'),'image/webp');
+  assert.match(await (await request('/')).text(),/QA Customer/);
+  const order = createdStory.order;
+  await expect('/api/admin/customer-stories',200,'PATCH',{id:createdStory.id,move:-1},true);
+  assert.ok((await getStories()).find(story=>story.id===createdStory.id).order < order);
+  await expect('/api/admin/customer-stories?id='+createdStory.id,200,'DELETE',undefined,true);
+  await expect(createdStory.imageUrl,404);
+  await expect('/e-luna/qa-vehicle',404);
+  await expect('/api/admin/products',200,'PUT',{id:added.product.id,isPublished:true},true);
+  assert.match(await (await expect('/e-luna/qa-vehicle',200)).text(),/QA Vehicle/);
+  assert.match(await (await request('/sitemap.xml')).text(),/e-luna\/qa-vehicle/);
   const stats=await (await expect('/api/analytics/stats',200,'GET',undefined,true)).json();assert.equal(stats.stats.totalVisits,0);assert.equal(stats.stats.conversionRate,null);assert.deepEqual(stats.stats.sources,[]);
   await expect('/api/analytics/track',400,'POST',{path:'/'});
   await expect('/api/analytics/track',200,'POST',{path:'/',consent:true,utmSource:'QA'});

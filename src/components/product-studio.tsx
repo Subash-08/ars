@@ -1,9 +1,48 @@
 "use client";
+
 import dynamic from "next/dynamic";
-import { useState } from "react";
-import { Reveal } from "./reveal";
-const Studio = dynamic(() => import("./viewer-360").then(m => m.Viewer360), { ssr: false, loading: () => <p className="p-10 text-center" role="status">Loading the interactive studio…</p> });
-export function ProductStudio() {
-    const [open, setOpen] = useState(false);
-    return <section id="360-studio" className="border-t border-neutral-200 bg-[#f4f5f3]"><Reveal><div className="max-w-7xl mx-auto px-5 sm:px-8 py-14 sm:py-20 grid md:grid-cols-2 items-center gap-8 sm:gap-16"><div><p className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">A closer look · The 360° studio</p><h2 className="text-3xl sm:text-4xl font-medium tracking-tight mt-4">Every angle.<br />At your own pace.</h2><p className="mt-5 max-w-xl text-sm text-neutral-600 leading-relaxed">Rotate the illustrative 3D model, explore colours and switch between day and night lighting. Or take a look at the product photographs.</p><p className="mt-3 text-xs text-neutral-500 leading-relaxed">The studio is an illustration. Confirm details, colours and configuration with the showroom.</p><button className="mt-7 rounded-full bg-neutral-950 text-white px-6 py-3 text-sm font-semibold hover:bg-neutral-700 transition-colors" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="studio-content">{open ? "Close studio" : "Explore in 3D"} <span className="ml-5" aria-hidden="true">{open ? "−" : "↗"}</span></button></div><div className="rounded-3xl border border-neutral-200 bg-white overflow-hidden"><img className="w-full aspect-[4/3] object-contain p-6 sm:p-10" src="/assets/bikes/studio-yellow-hd.jpg" alt="E-Luna studio preview" width={800} height={600} loading="lazy"/></div></div></Reveal><div id="studio-content">{open && <Studio lang="en"/>}</div></section>;
+import { useEffect, useRef, useState } from "react";
+import type { VariantType } from "./eluna-3d-canvas";
+
+const Studio = dynamic(() => import("./viewer-360").then(m => m.Viewer360), { ssr: false });
+
+export function ProductStudio({ variant, preview = "/assets/bikes/studio-yellow-hd.jpg" }: {
+  variant?: VariantType;
+  preview?: string;
+}) {
+  const section = useRef<HTMLElement>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!section.current || !window.IntersectionObserver) {
+      setReady(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setReady(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: "320px" });
+    observer.observe(section.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section ref={section} id="360-studio" className="border-t border-neutral-200 bg-[#f4f5f3]">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-14 pb-7 text-center">
+        <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">The 360° studio</p>
+        <h2 className="mt-4 text-3xl sm:text-4xl font-medium tracking-tight">Every angle. At your own pace.</h2>
+        <p className="mt-4 mx-auto max-w-xl text-sm text-neutral-600">
+          Rotate the illustrative model, explore finishes and switch lighting. Confirm the exact vehicle and available colours with the showroom.
+        </p>
+      </div>
+      {ready ? <Studio lang="en" fixedVariant={variant} embedded/> : (
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 pb-12">
+          <img src={preview} alt="Vehicle studio preview" width={900} height={560}
+            className="w-full h-[440px] sm:h-[560px] object-contain rounded-3xl bg-white" loading="lazy"/>
+        </div>
+      )}
+    </section>
+  );
 }

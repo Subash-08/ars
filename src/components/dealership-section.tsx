@@ -29,7 +29,7 @@ export function DealershipSection({ lang }: DealershipSectionProps) {
         {/* 2 Dealership Locations Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {/* Location 1: Main Showroom (Seelanaickenpatti Bypass) */}
-          <div className="rounded-2xl p-6 sm:p-8 border border-neutral-200/90 bg-white shadow-2xs flex flex-col justify-between group hover:border-neutral-300 transition-all duration-300">
+          <div id="seelanaickenpatti" className="rounded-2xl p-6 sm:p-8 border border-neutral-200/90 bg-white shadow-2xs flex flex-col justify-between group hover:border-neutral-300 transition-all duration-300">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-neutral-100 text-neutral-800 border border-neutral-200">
@@ -85,7 +85,7 @@ export function DealershipSection({ lang }: DealershipSectionProps) {
           </div>
 
           {/* Location 2: Branch Showroom (Madathur / Elampillai Road) */}
-          <div className="rounded-2xl p-6 sm:p-8 border border-neutral-200/90 bg-white shadow-2xs flex flex-col justify-between group hover:border-neutral-300 transition-all duration-300">
+          <div id="madathur" className="rounded-2xl p-6 sm:p-8 border border-neutral-200/90 bg-white shadow-2xs flex flex-col justify-between group hover:border-neutral-300 transition-all duration-300">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-neutral-100 text-neutral-800 border border-neutral-200">

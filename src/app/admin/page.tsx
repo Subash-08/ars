@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { AdminCustomerStories } from "@/components/admin-customer-stories";
 import { useRouter } from "next/navigation";
 import {
   Users,
@@ -103,7 +104,7 @@ export default function AdminDashboardPage() {
 
   // Navigation Tabs: leads | products | offers | banners | analytics
   const [activeTab, setActiveTab] = useState<
-    "leads" | "products" | "offers" | "banners" | "analytics"
+    "leads" | "products" | "offers" | "banners" | "analytics" | "stories"
   >("leads");
 
   // Mobile sidebar drawer state
@@ -322,6 +323,7 @@ export default function AdminDashboardPage() {
   });
 
   const navItems = [
+    { id: "stories", label: "Customer Stories", icon: MessageSquare, desc: "Testimonials & delivery photos" },
     {
       id: "leads",
       label: "Bookings & Leads",
@@ -563,6 +565,7 @@ export default function AdminDashboardPage() {
                   {activeTab === "products" && "Vehicle Catalog & Pricing"}
                   {activeTab === "offers" && "Salem Exclusive Offers"}
                   {activeTab === "analytics" && "Attribution & Lead Analytics"}
+                  {activeTab === "stories" && "Customer Stories"}
                 </h1>
               </div>
               <span className="text-[11px] text-slate-400 hidden sm:inline">
@@ -1037,6 +1040,8 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           )}
+
+          {activeTab === "stories" && <AdminCustomerStories/>}
 
           {/* TAB 4: ANALYTICS & TRAFFIC */}
           {activeTab === "analytics" && (

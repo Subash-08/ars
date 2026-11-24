@@ -1,3 +1,5 @@
+import { CustomerSections } from "@/components/customer-stories";
+import { publicStories } from "@/lib/customer-stories";
 import { ProductStudio } from "@/components/product-studio";
 import { HomeFaq } from "@/components/home-faq";
 import { OffersContent } from "@/components/offers-content";
@@ -10,6 +12,6 @@ import { getCatalog } from "@/lib/catalog";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "ARS Motors Salem | Explore Kinetic E-Luna", alternates: { canonical: "/" } };
 export default async function HomePage() {
-  const catalog = await getCatalog();
-  return <SiteShell><HomeHero/><ProductCatalog {...catalog} compact/><HomeBenefits/><ProductStudio/><FinanceTeaser/><OffersContent/><LocalTeaser/><HomeFaq/><BookingCta/></SiteShell>;
+  const [catalog, stories] = await Promise.all([getCatalog(), publicStories()]);
+  return <SiteShell><HomeHero/><ProductCatalog {...catalog} compact/><HomeBenefits/><ProductStudio/><FinanceTeaser/><OffersContent/><LocalTeaser/><CustomerSections stories={stories}/><HomeFaq/><BookingCta/></SiteShell>;
 }

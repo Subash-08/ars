@@ -1,0 +1,91 @@
+.section {
+  --ink: #14251d;
+  --paper: #fffdf9;
+  background: #bcd2c4;
+  color: var(--ink);
+  padding-block: clamp(52px, 7vw, 100px);
+  overflow: clip;
+}
+
+.wrap {
+  width: min(90%, 1320px);
+  margin-inline: auto;
+}
+
+.heading {
+  text-align: center;
+  margin-bottom: clamp(32px, 5vw, 68px);
+}
+
+.heading h2 {
+  font-size: clamp(32px, 4.25vw, 65px);
+  font-weight: 750;
+  line-height: 1.02;
+  letter-spacing: -.055em;
+}
+
+.heading p { margin-top: 12px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(94%, 1120px);
+  margin-inline: auto;
+  gap: 32px 26px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bubble {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-height: clamp(130px, 15vw, 190px);
+  margin-bottom: 24px;
+  padding: clamp(17px, 2.25vw, 32px);
+  border: 1px solid var(--ink);
+  border-radius: 15px;
+  background: var(--paper);
+  box-shadow: 5px 6px var(--ink);
+  rotate: 1.5deg;
+  font-size: clamp(14px, 1.15vw, 16px);
+  line-height: 1.5;
+}
+
+.grid > :nth-child(even) .bubble { rotate: -1.5deg; }
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 25px;
+  bottom: -8px;
+  width: 14px;
+  height: 14px;
+  rotate: 45deg;
+  background: var(--paper);
+  border-right: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+.caption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-inline: 12px;
+}
+
+.caption strong { display: block; font-size: 16px; line-height: 1.22; }
+.caption p { margin-top: 3px; font-size: 13px; }
+
+@media (max-width: 820px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+}

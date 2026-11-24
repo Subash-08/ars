@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Hero } from "./hero";
 import { Reveal } from "./reveal";
 import { bookingUrl } from "@/lib/navigation";
-export function HomeHero() { const router = useRouter(); return <Hero lang="en" onBookTestRide={model => router.push(bookingUrl({ model }))} onExplore360={() => { document.getElementById("360-studio")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }} onLearnMore={model => router.push(`/e-luna${model ? `?model=${encodeURIComponent(model)}` : ""}#specs-matrix`)} onCalculateSavings={() => router.push("/finance-offers#savings-calculator")}/>; }
+export function HomeHero() { const router = useRouter(); return <Hero lang="en" onBookTestRide={model => router.push(bookingUrl({ model }))} onExplore360={() => { document.getElementById("360-studio")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }} onLearnMore={() => router.push("/e-luna/kinetic-e-luna-pro-x3#specifications")} onCalculateSavings={() => router.push("/finance-offers#savings-calculator")}/>; }
 export function HomeBenefits() {
     return <section className="py-16 sm:py-24 bg-neutral-50 border-b border-neutral-200"><div className="max-w-7xl mx-auto px-5 sm:px-8"><Reveal><p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">Built around your day</p><h2 className="mt-3 text-3xl sm:text-4xl font-medium tracking-tight">Less complexity. More possibility.</h2></Reveal><div className="grid md:grid-cols-3 gap-8 mt-10">{[
             ["01", "A practical everyday ride", "Explore options for the daily commute, family errands and business deliveries.", "/e-luna", "Find your fit"],

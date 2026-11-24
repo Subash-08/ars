@@ -38,17 +38,19 @@ const Eluna3DCanvas = dynamic(
 );
 
 interface Viewer360Props {
+  fixedVariant?: VariantType;
+  embedded?: boolean;
   lang: Language;
 }
 
 type StudioViewMode = "3d_model" | "photo_turntable";
 
-export function Viewer360({ lang }: Viewer360Props) {
+export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
   const t = translations[lang];
 
   // Configurator States
   const [viewMode, setViewMode] = useState<StudioViewMode>("3d_model");
-  const [variant, setVariant] = useState<VariantType>("pro_x3");
+  const [variant, setVariant] = useState<VariantType>(fixedVariant ?? "pro_x3");
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>("day");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [resetKey,setResetKey]=useState(0);
@@ -316,11 +318,11 @@ export function Viewer360({ lang }: Viewer360Props) {
       className={`${
         isFullscreen
           ? "fixed inset-0 z-50 w-full h-[100dvh] bg-neutral-950"
-          : "py-16 md:py-24 bg-white text-neutral-900 border-t border-neutral-200"
+          : embedded ? "pb-14 sm:pb-20 text-neutral-900" : "py-16 md:py-24 bg-white text-neutral-900 border-t border-neutral-200"
       }`}
     >
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isFullscreen ? "h-full" : ""}`}>
-        {!isFullscreen && (
+        {!isFullscreen && !embedded && (
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-neutral-500 block mb-2">
               Automotive Studio Experience
@@ -406,7 +408,7 @@ export function Viewer360({ lang }: Viewer360Props) {
               </div>
 
               {/* Model Variant Pills */}
-              <div
+              {!fixedVariant && <div
                 className={`flex p-1 rounded-full border shadow-2xs backdrop-blur-md items-center space-x-1 ${
                   timeOfDay === "day"
                     ? "bg-white/90 border-neutral-200"
@@ -437,7 +439,7 @@ export function Viewer360({ lang }: Viewer360Props) {
                     {v.label}
                   </button>
                 ))}
-              </div>
+              </div>}
             </div>
 
             {/* Center Angle HUD */}

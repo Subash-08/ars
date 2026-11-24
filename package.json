@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit --incremental false",
     "test": "node --test tests/core.test.cjs",
     "test:integration": "node tests/integration.cjs",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:stories": "node prisma/setup-customer-stories.cjs"
   },
   "dependencies": {
     "@prisma/client": "^5.21.1",
