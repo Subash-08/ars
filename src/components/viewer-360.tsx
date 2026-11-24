@@ -1,4 +1,6 @@
 "use client";
+import { Copy, useCopy } from "@/components/site-language";
+
 
 import { Dialog } from "./dialog";
 import React, { useState, useRef, useEffect } from "react";
@@ -30,7 +32,7 @@ const Eluna3DCanvas = dynamic(
       <div className="w-full h-full flex flex-col items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin mb-3" />
         <span className="text-xs text-neutral-500 font-mono tracking-wider">
-          LOADING 3D STUDIO...
+          <Copy>{"LOADING 3D STUDIO..."}</Copy>
         </span>
       </div>
     ),
@@ -46,6 +48,7 @@ interface Viewer360Props {
 type StudioViewMode = "3d_model" | "photo_turntable";
 
 export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
+  const translate = useCopy();
   const t = translations[lang];
 
   // Configurator States
@@ -325,13 +328,13 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
         {!isFullscreen && !embedded && (
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-neutral-500 block mb-2">
-              Automotive Studio Experience
+              <Copy>{"Automotive Studio Experience"}</Copy>
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-semibold text-neutral-950 tracking-tight">
-              360° Studio Configurator
+              <Copy>{"360° Studio Configurator"}</Copy>
             </h2>
             <p className="mt-2 text-neutral-600 text-sm sm:text-base leading-relaxed">
-              Explore the Kinetic E-Luna in 360°. Drag to rotate the illustrative model, choose colours and explore the details. Product photographs show fixed views.
+              <Copy>{"Explore the Kinetic E-Luna in 360°. Drag to rotate the illustrative model, choose colours and explore the details. Product photographs show fixed views."}</Copy>
             </p>
           </div>
         )}
@@ -383,10 +386,10 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                       ? "text-neutral-600 hover:text-black"
                       : "text-white/70 hover:text-white"
                   }`}
-                  title="Interactive illustrative vehicle model"
+                  title={translate("Interactive illustrative vehicle model")}
                 >
                   <Box className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>3D Model</span>
+                  <span><Copy>{"3D Model"}</Copy></span>
                 </button>
 
                 <button
@@ -400,10 +403,10 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                       ? "text-neutral-600 hover:text-black"
                       : "text-white/70 hover:text-white"
                   }`}
-                  title="Product photographs, shown from fixed angles"
+                  title={translate("Product photographs, shown from fixed angles")}
                 >
                   <ImageIcon className="w-3.5 h-3.5 text-blue-500" />
-                  <span>Product Photos</span>
+                  <span><Copy>{"Product Photos"}</Copy></span>
                 </button>
               </div>
 
@@ -436,7 +439,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                         : "text-white/70 hover:text-white"
                     }`}
                   >
-                    {v.label}
+                    <Copy>{v.label}</Copy>
                   </button>
                 ))}
               </div>}
@@ -468,7 +471,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                     ? "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
                     : "bg-neutral-900 border-neutral-700 text-amber-300 hover:bg-neutral-800"
                 }`}
-                title={`Switch to ${timeOfDay === "day" ? "Night (Headlight ON)" : "Day"} Studio`}
+                title={translate(timeOfDay === "day" ? "Switch to night lighting" : "Switch to day lighting")}
               >
                 {timeOfDay === "day" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
               </button>
@@ -485,7 +488,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                 }`}
               >
                 {isAutoRotate ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                <span>{isAutoRotate ? "Pause" : "Auto Spin 360°"}</span>
+                <span>{translate(isAutoRotate ? "Pause" : "Auto Spin 360°")}</span>
               </button>
 
               {/* Reset Angle */}
@@ -496,7 +499,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                     ? "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
                     : "bg-neutral-900 border-neutral-700 text-white hover:bg-neutral-800"
                 }`}
-                title="Reset Camera to 45°"
+                title={translate("Reset Camera to 45°")}
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
@@ -509,7 +512,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                     ? "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
                     : "bg-neutral-900 border-neutral-700 text-white hover:bg-neutral-800"
                 }`}
-                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                title={translate(isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen")}
               >
                 {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
               </button>
@@ -565,7 +568,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                     }`}
                   >
                     <Sparkles className="w-3 h-3 text-emerald-500" />
-                    <span>Drag to rotate · Arrow keys to rotate/zoom · Home to reset</span>
+                    <span><Copy>{"Drag to rotate · Arrow keys to rotate/zoom · Home to reset"}</Copy></span>
                   </div>
                 </div>
               </div>
@@ -610,7 +613,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                     }`}
                   >
                     <Sparkles className="w-3 h-3 text-blue-500" />
-                    <span>Product photograph · Pick a colour below</span>
+                    <span><Copy>{"Product photograph · Pick a colour below"}</Copy></span>
                   </div>
                 </div>
               </div>
@@ -632,7 +635,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider flex items-center space-x-1">
                       <Layers className="w-3 h-3" />
-                      <span>Component Highlight</span>
+                      <span><Copy>{"Component Highlight"}</Copy></span>
                     </span>
                     <button
                       onClick={() => setActiveHotspot(null)}
@@ -641,12 +644,12 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <h4 className="text-sm font-semibold">{currentHotspot.name}</h4>
+                  <h4 className="text-sm font-semibold"><Copy>{currentHotspot.name}</Copy></h4>
                   <p className="text-xs font-mono font-medium text-emerald-600 mt-0.5">
-                    {currentHotspot.spec}
+                    <Copy>{currentHotspot.spec}</Copy>
                   </p>
                   <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
-                    {currentHotspot.desc}
+                    <Copy>{currentHotspot.desc}</Copy>
                   </p>
                 </div>
               </div>
@@ -669,7 +672,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                 {currentVariant.hasColors ? (
                   <>
                     <span className="text-xs font-medium text-neutral-500 hidden sm:inline">
-                      Color Finish:
+                      <Copy>{"Color Finish:"}</Copy>
                     </span>
                     <div className="flex items-center space-x-2">
                       {colors.map((c) => (
@@ -682,7 +685,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                               : "opacity-80 hover:opacity-100 hover:scale-105"
                           }`}
                           style={{ backgroundColor: c.hex }}
-                          title={c.name}
+                          title={translate(c.name)}
                           aria-pressed={selectedColor.id === c.id}
                         >
                           {selectedColor.id === c.id && (
@@ -692,7 +695,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                       ))}
                     </div>
                     <span className="text-xs font-semibold truncate max-w-[130px]">
-                      {selectedColor.name}
+                      <Copy>{selectedColor.name}</Copy>
                     </span>
                   </>
                 ) : (
@@ -720,7 +723,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                           : "text-neutral-500 hover:text-neutral-900"
                       }`}
                     >
-                      {preset.label}
+                      <Copy>{preset.label}</Copy>
                     </button>
                   ))}
                 </div>
@@ -728,7 +731,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                 <div className="flex-1 flex items-center space-x-2">
                   <span className="text-[10px] font-mono text-neutral-400">0°</span>
                   <input
-                    type="range" aria-label="Studio viewing angle"
+                    type="range" aria-label={translate("Studio viewing angle")}
                     min="0"
                     max="360"
                     value={Math.round(rotationAngle)}
@@ -748,7 +751,7 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
                   onClick={scrollToBooking}
                   className="px-5 py-2 rounded-full bg-neutral-950 hover:bg-neutral-800 text-white font-semibold text-xs transition-all active:scale-95 shadow-sm"
                 >
-                  Book Test Ride
+                  <Copy>{"Book Test Ride"}</Copy>
                 </button>
               </div>
             </div>
@@ -757,5 +760,5 @@ export function Viewer360({ lang, fixedVariant, embedded }: Viewer360Props) {
       </div>
     </section>
   );
-  return isFullscreen ? <Dialog title="Fullscreen vehicle studio" onClose={()=>setIsFullscreen(false)}>{content}</Dialog> : content;
+  return isFullscreen ? <Dialog title={translate("Fullscreen vehicle studio")} onClose={()=>setIsFullscreen(false)}>{content}</Dialog> : content;
 }

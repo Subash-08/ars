@@ -1,4 +1,5 @@
 "use client";
+import { Copy } from "@/components/site-language";
 
 import React, { useState, useEffect } from "react";
 import { translations, Language } from "@/lib/translations";
@@ -41,20 +42,20 @@ export function OffersSection({ lang, onClaimOffer }: OffersSectionProps) {
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
           <span className="text-xs font-semibold uppercase tracking-widest text-neutral-500 block mb-2">
-            Exclusive Salem Promotions
+            <Copy>{"Exclusive Salem Promotions"}</Copy>
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-semibold text-neutral-950 tracking-tight">
-            Special Dealership Offers
+            <Copy>{"Special Dealership Offers"}</Copy>
           </h2>
           <p className="mt-3 text-neutral-600 text-sm sm:text-base leading-relaxed">
-            Ask our team to confirm the eligibility, availability and conditions of any listed offer. An enquiry does not reserve or redeem an offer.
+            <Copy>{"Ask our team to confirm the eligibility, availability and conditions of any listed offer. An enquiry does not reserve or redeem an offer."}</Copy>
           </p>
         </div>
 
-        {state === "loading" && <p role="status" className="text-center text-sm text-neutral-500 mb-6">Checking current offers…</p>}
-        {state === "error" && <p role="status" className="text-center text-sm text-neutral-600 mb-6">We couldn’t load offers. Please contact the showroom for current details.</p>}
-        {state === "ready" && offers.length === 0 && <p className="text-center text-sm text-neutral-600 mb-6">No current offers are listed. Contact us for a written quote.</p>}
-        <p className="text-center text-xs text-neutral-500 mb-8">No online payment is collected. <a href="/offer-terms" className="underline">Offer information</a> · <a href="/booking-terms" className="underline">Reservation enquiries</a></p>
+        {state === "loading" && <p role="status" className="text-center text-sm text-neutral-500 mb-6"><Copy>{"Checking current offers…"}</Copy></p>}
+        {state === "error" && <p role="status" className="text-center text-sm text-neutral-600 mb-6"><Copy>{"We couldn’t load offers. Please contact the showroom for current details."}</Copy></p>}
+        {state === "ready" && offers.length === 0 && <p className="text-center text-sm text-neutral-600 mb-6"><Copy>{"No current offers are listed. Contact us for a written quote."}</Copy></p>}
+        <p className="text-center text-xs text-neutral-500 mb-8"><Copy>{"No online payment is collected."}</Copy>{" "}<a href="/offer-terms" className="underline"><Copy>{"Offer information"}</Copy></a> · <a href="/booking-terms" className="underline"><Copy>{"Reservation enquiries"}</Copy></a></p>
         {/* Offers Cards Grid - Premium Minimalist Layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {offers
@@ -77,7 +78,7 @@ export function OffersSection({ lang, onClaimOffer }: OffersSectionProps) {
                           : "bg-neutral-200/70 text-neutral-700 border-neutral-300"
                       }`}
                     >
-                      {offer.badge}
+                      <Copy>{offer.badge}</Copy>
                     </span>
                     <span
                       className={`flex items-center space-x-1 text-[11px] font-medium ${
@@ -85,7 +86,7 @@ export function OffersSection({ lang, onClaimOffer }: OffersSectionProps) {
                       }`}
                     >
                       <Clock className="w-3 h-3" />
-                      <span>{offer.validTill}</span>
+                      <span><Copy>{offer.validTill}</Copy></span>
                     </span>
                   </div>
 
@@ -94,14 +95,14 @@ export function OffersSection({ lang, onClaimOffer }: OffersSectionProps) {
                       index === 0 ? "text-white" : "text-neutral-950"
                     }`}
                   >
-                    {offer.discount}
+                    <Copy>{offer.discount}</Copy>
                   </h3>
                   <div
                     className={`text-xs font-semibold mb-3 ${
                       index === 0 ? "text-emerald-400" : "text-neutral-700"
                     }`}
                   >
-                    {offer.title}
+                    <Copy>{offer.title}</Copy>
                   </div>
 
                   <p
@@ -109,7 +110,7 @@ export function OffersSection({ lang, onClaimOffer }: OffersSectionProps) {
                       index === 0 ? "text-neutral-300" : "text-neutral-600"
                     }`}
                   >
-                    {offer.description}
+                    <Copy>{offer.description}</Copy>
                   </p>
                 </div>
 
@@ -120,7 +121,7 @@ export function OffersSection({ lang, onClaimOffer }: OffersSectionProps) {
                         index === 0 ? "text-neutral-500" : "text-neutral-400"
                       }`}
                     >
-                      * {offer.terms}
+                      * <Copy>{offer.terms}</Copy>
                     </p>
                   )}
 
@@ -132,7 +133,7 @@ export function OffersSection({ lang, onClaimOffer }: OffersSectionProps) {
                         : "bg-neutral-950 hover:bg-neutral-800 text-white"
                     }`}
                   >
-                    <span>Enquire About Offer</span>
+                    <span><Copy>{"Enquire About Offer"}</Copy></span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>

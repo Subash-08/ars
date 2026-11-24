@@ -1,3 +1,5 @@
+import { Copy } from "@/components/site-language";
+
 import Link from "next/link";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { Reveal } from "./reveal";
@@ -17,13 +19,13 @@ export function HomeFaq() {
     <section id="test-ride-faq" aria-labelledby="test-ride-faq-title" className="border-t border-neutral-200 bg-white py-16 sm:py-24">
       <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[0.9fr_1.35fr] lg:gap-16">
         <Reveal>
-          <p className="text-xs font-semibold uppercase tracking-[0.19em] text-emerald-900">Before your first ride</p>
-          <h2 id="test-ride-faq-title" className="mt-4 max-w-md text-4xl font-medium tracking-tight sm:text-5xl">Questions before you visit?</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.19em] text-emerald-900"><Copy>{"Before your first ride"}</Copy></p>
+          <h2 id="test-ride-faq-title" className="mt-4 max-w-md text-4xl font-medium tracking-tight sm:text-5xl"><Copy>{"Questions before you visit?"}</Copy></h2>
           <div className="mt-7 max-w-sm rounded-2xl border border-[#d8e4dc] bg-[#f2f7f3] p-5 sm:p-6">
-            <p className="font-semibold">Speak to the Salem team</p>
-            <p className="mt-2 text-sm leading-relaxed text-neutral-600">Ask about a specific model, test ride, or on-road quote.</p>
+            <p className="font-semibold"><Copy>{"Speak to the Salem team"}</Copy></p>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-600"><Copy>{"Ask about a specific model, test ride, or on-road quote."}</Copy></p>
             <Link href="/showrooms" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-950 underline underline-offset-4">
-              Find your showroom <ArrowUpRight size={15} aria-hidden="true"/>
+              <Copy>{"Find your showroom"}</Copy>{" "}<ArrowUpRight size={15} aria-hidden="true"/>
             </Link>
           </div>
         </Reveal>
@@ -32,17 +34,17 @@ export function HomeFaq() {
             {questions.map(([question, answer]) => (
               <details key={question} className="group open:bg-[#f4f8f5]">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-medium hover:bg-[#f4f8f5] sm:px-6 [&::-webkit-details-marker]:hidden">
-                  {question}
+                  <Copy>{question}</Copy>
                   <span className="grid size-8 shrink-0 place-items-center rounded-full border border-[#d8e4dc] bg-white text-emerald-900">
                     <Plus size={16} aria-hidden="true" className="group-open:rotate-45 motion-safe:transition-transform"/>
                   </span>
                 </summary>
-                <p className="px-5 pb-5 text-sm leading-relaxed text-neutral-700 sm:px-6">{answer}</p>
+                <p className="px-5 pb-5 text-sm leading-relaxed text-neutral-700 sm:px-6"><Copy>{answer}</Copy></p>
               </details>
             ))}
           </div>
           <Link className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-950 underline underline-offset-4" href="/ownership#faq-section">
-            More about ownership <ArrowUpRight size={15} aria-hidden="true"/>
+            <Copy>{"More about ownership"}</Copy>{" "}<ArrowUpRight size={15} aria-hidden="true"/>
           </Link>
         </Reveal>
       </div>

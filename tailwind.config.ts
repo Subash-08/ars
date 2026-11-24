@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 
-const siteFonts = ["Manrope", "system-ui", '"Nirmala UI"', "sans-serif"];
+const siteFonts = ['var(--site-typeface, "Bricolage Grotesque")', '"Bricolage Grotesque"', "system-ui", '"Nirmala UI"', "sans-serif"];
 
 const config: Config = {
   content: [

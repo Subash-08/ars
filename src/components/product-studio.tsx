@@ -1,4 +1,6 @@
 "use client";
+import { Copy, useCopy } from "@/components/site-language";
+
 
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
@@ -10,6 +12,7 @@ export function ProductStudio({ variant, preview = "/assets/bikes/studio-yellow-
   variant?: VariantType;
   preview?: string;
 }) {
+  const translate = useCopy();
   const section = useRef<HTMLElement>(null);
   const [ready, setReady] = useState(false);
 
@@ -31,15 +34,15 @@ export function ProductStudio({ variant, preview = "/assets/bikes/studio-yellow-
   return (
     <section ref={section} id="360-studio" className="border-t border-neutral-200 bg-[#f4f5f3]">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-14 pb-7 text-center">
-        <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">The 360° studio</p>
-        <h2 className="mt-4 text-3xl sm:text-4xl font-medium tracking-tight">Every angle. At your own pace.</h2>
+        <p className="text-xs uppercase tracking-[0.22em] text-neutral-500"><Copy>{"The 360° studio"}</Copy></p>
+        <h2 className="mt-4 text-3xl sm:text-4xl font-medium tracking-tight"><Copy>{"Every angle. At your own pace."}</Copy></h2>
         <p className="mt-4 mx-auto max-w-xl text-sm text-neutral-600">
-          Rotate the illustrative model, explore finishes and switch lighting. Confirm the exact vehicle and available colours with the showroom.
+          <Copy>{"Rotate the illustrative model, explore finishes and switch lighting. Confirm the exact vehicle and available colours with the showroom."}</Copy>
         </p>
       </div>
       {ready ? <Studio lang="en" fixedVariant={variant} embedded/> : (
         <div className="max-w-7xl mx-auto px-5 sm:px-8 pb-12">
-          <img src={preview} alt="Vehicle studio preview" width={900} height={560}
+          <img src={preview} alt={translate("Vehicle studio preview")} width={900} height={560}
             className="w-full h-[440px] sm:h-[560px] object-contain rounded-3xl bg-white" loading="lazy"/>
         </div>
       )}

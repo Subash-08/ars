@@ -1,4 +1,6 @@
 "use client";
+import { Copy } from "@/components/site-language";
+
 
 import React, { useState, useEffect } from "react";
 import { translations, Language } from "@/lib/translations";
@@ -146,7 +148,7 @@ export function Hero({
           className="hidden sm:inline-flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 text-white text-xs font-semibold transition-all active:scale-95"
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-          <span>360° Studio</span>
+          <span><Copy>{"360° Studio"}</Copy></span>
         </button>
       </div>
 
@@ -156,7 +158,7 @@ export function Hero({
           {/* Subtle Category Pill Badge */}
           <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-medium border border-white/20 mb-3.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>{slide.pillBadge}</span>
+            <span><Copy>{slide.pillBadge}</Copy></span>
           </div>
 
           {/* Main Headline */}
@@ -164,11 +166,11 @@ export function Hero({
             {slide.headlineLine1}
           </h1>
           <p className="mt-1.5 text-xl sm:text-2xl lg:text-3xl font-light text-white/90 tracking-tight">
-            {slide.headlineLine2}
+            <Copy>{slide.headlineLine2}</Copy>
           </p>
 
           <p className="mt-3 text-xs sm:text-sm text-white/75 max-w-xl leading-relaxed">
-            {slide.subhead}
+            <Copy>{slide.subhead}</Copy>
           </p>
 
           {/* CTA Buttons */}
@@ -177,14 +179,14 @@ export function Hero({
               onClick={slide.primaryAction}
               className="px-7 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white hover:bg-neutral-100 text-neutral-950 font-semibold text-xs sm:text-sm transition-all duration-200 active:scale-95 shadow-lg flex items-center space-x-2"
             >
-              <span>{slide.primaryBtn}</span>
+              <span><Copy>{slide.primaryBtn}</Copy></span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={slide.secondaryAction}
               className="px-6 sm:px-7 py-3 sm:py-3.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border border-white/25 font-medium text-xs sm:text-sm transition-all duration-200 active:scale-95"
             >
-              <span>{slide.secondaryBtn}</span>
+              <span><Copy>{slide.secondaryBtn}</Copy></span>
             </button>
           </div>
         </div>
@@ -194,10 +196,10 @@ export function Hero({
           {slide.specs.map((spec, i) => (
             <div key={i} className="flex flex-col">
               <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-white/60 font-medium">
-                {spec.label}
+                <Copy>{spec.label}</Copy>
               </span>
               <span className="text-base sm:text-lg font-semibold text-white tracking-tight font-mono mt-0.5">
-                {spec.value}
+                <Copy>{spec.value}</Copy>
               </span>
             </div>
           ))}

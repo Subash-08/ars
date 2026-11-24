@@ -35,7 +35,10 @@ import {
   Layers,
   BarChart3,
   Sliders,
+  type LucideIcon,
 } from "lucide-react";
+
+type AdminSection = "leads" | "products" | "offers" | "banners" | "analytics" | "stories";
 
 interface Lead {
   id: string;
@@ -103,9 +106,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
 
   // Navigation Tabs: leads | products | offers | banners | analytics
-  const [activeTab, setActiveTab] = useState<
-    "leads" | "products" | "offers" | "banners" | "analytics" | "stories"
-  >("leads");
+  const [activeTab, setActiveTab] = useState<AdminSection>("leads");
 
   // Mobile sidebar drawer state
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -135,9 +136,29 @@ export default function AdminDashboardPage() {
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
 
   const [loadError, setLoadError] = useState("");
+  const [sessionReady, setSessionReady] = useState(false);
+  const [sessionError, setSessionError] = useState(false);
   useEffect(() => {
-    fetch("/api/auth/session").then(res => { if (!res.ok) router.replace("/admin/login"); else fetchData(); }).catch(() => { setLoadError("Could not verify your session. Please reload."); setIsLoading(false); });
+    void checkSession();
   }, [router]);
+
+  async function checkSession() {
+    const stories = new URLSearchParams(location.search).get("section") === "stories";
+    setSessionError(false);
+    try {
+      const response = await fetch("/api/auth/session", { cache: "no-store" });
+      if (response.status === 401) {
+        router.replace(stories ? "/admin/login?section=stories" : "/admin/login");
+        return;
+      }
+      if (!response.ok) throw new Error();
+      if (stories) setActiveTab("stories");
+      setSessionReady(true);
+      void fetchData();
+    } catch {
+      setSessionError(true);
+    }
+  }
 
   const fetchData = async () => {
     setIsLoading(true); setLoadError("");
@@ -151,7 +172,12 @@ export default function AdminDashboardPage() {
           fetch("/api/admin/banners").catch(() => null),
         ]);
 
-      if (leadsRes.status === 401) { router.replace("/admin/login"); return; }
+      if ([leadsRes, statsRes, productsRes, offersRes, bannersRes].some(response => response?.status === 401)) {
+        setSessionReady(false);
+        const stories = new URLSearchParams(location.search).get("section") === "stories";
+        router.replace(stories ? "/admin/login?section=stories&expired=1" : "/admin/login?expired=1");
+        return;
+      }
       if (!leadsRes.ok || !statsRes.ok || !productsRes?.ok || !offersRes?.ok || !bannersRes?.ok) throw new Error("Data unavailable");
       const leadsData = await leadsRes.json();
       const statsData = await statsRes.json();
@@ -322,8 +348,7 @@ export default function AdminDashboardPage() {
     return matchesSearch && matchesStatus && matchesBranch && matchesInquiry;
   });
 
-  const navItems = [
-    { id: "stories", label: "Customer Stories", icon: MessageSquare, desc: "Testimonials & delivery photos" },
+  const navItems: { id: AdminSection; label: string; icon: LucideIcon; color?: string; badge?: number }[] = [
     {
       id: "leads",
       label: "Bookings & Leads",
@@ -335,16 +360,17 @@ export default function AdminDashboardPage() {
       id: "products",
       label: "Vehicles & Prices",
       icon: Package,
-      badge: products.length > 0 ? products.length : 3,
+      badge: products.length || undefined,
       color: "text-sky-400",
     },
     {
       id: "offers",
       label: "Salem Offers",
       icon: Tag,
-      badge: offers.length > 0 ? offers.length : 3,
+      badge: offers.length || undefined,
       color: "text-amber-400",
     },
+    { id: "stories", label: "Customer stories", icon: MessageSquare, color: "text-emerald-300" },
     {
       id: "analytics",
       label: "Analytics & Traffic",
@@ -353,16 +379,23 @@ export default function AdminDashboardPage() {
     },
   ];
 
+  if (!sessionReady) return (
+    <div className="grid min-h-screen place-items-center bg-[#090b0e] p-5 text-slate-100">
+      {sessionError
+        ? <div role="alert" className="rounded-2xl border border-white/10 bg-[#141a25] p-5 text-sm"><p>Could not verify your session.</p><button className="mt-3 underline" onClick={() => void checkSession()}>Try again</button></div>
+        : <p role="status" className="text-sm text-slate-300">Checking your session…</p>}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#090b0e] text-white flex flex-col md:flex-row">
-      {loadError && <div role="alert" className="fixed top-4 left-4 right-4 z-[100] rounded-xl bg-red-50 border border-red-200 p-4 text-red-900 text-sm">{loadError} <button className="underline" onClick={fetchData}>Retry</button></div>}
       {/* SIDEBAR NAVIGATION (Desktop persistent, Mobile overlay) */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 w-72 bg-[#0c0f17] border-r border-white/[0.08] flex flex-col justify-between shrink-0 transition-transform duration-300 md:static md:translate-x-0 ${
-          isMobileSidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+      <aside id="admin-navigation"
+        className={`fixed inset-y-0 left-0 z-40 w-72 bg-[#0c0f17] border-r border-white/[0.08] flex flex-col justify-between shrink-0 transition-transform duration-300 md:sticky md:top-0 md:h-dvh md:visible md:translate-x-0 ${
+          isMobileSidebarOpen ? "visible translate-x-0 shadow-2xl" : "invisible -translate-x-full"
         }`}
       >
-        <div className="flex flex-col h-full justify-between">
+        <div className="flex h-full flex-col justify-between overflow-y-auto">
           <div>
 
       {/* Sidebar Header / Brand */}
@@ -388,26 +421,15 @@ export default function AdminDashboardPage() {
 
               {/* Close button on mobile */}
               <button
-                onClick={() => setIsMobileSidebarOpen(false)}
+                onClick={() => setIsMobileSidebarOpen(false)} aria-label="Close navigation"
                 className="md:hidden p-1.5 rounded-xl bg-white/[0.05] text-slate-400 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Live Status Pill */}
-            <div className="px-6 py-3 border-b border-white/[0.05] bg-white/[0.01]">
-              <div className="flex items-center justify-between text-[11px]">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-semibold text-slate-300">Live CRM Connected</span>
-                </div>
-                <span className="font-mono text-[10px] text-slate-500">v2.4</span>
-              </div>
-            </div>
-
             {/* Navigation Menu */}
-            <div className="p-4 space-y-1.5">
+            <nav className="p-4 space-y-1.5" aria-label="Admin sections">
               <span className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">
                 Dealership Management
               </span>
@@ -418,8 +440,11 @@ export default function AdminDashboardPage() {
                 return (
                   <button
                     key={item.id}
+                    type="button"
+                    aria-current={isActive ? "page" : undefined}
                     onClick={() => {
-                      setActiveTab(item.id as any);
+                      setActiveTab(item.id);
+                      window.history.replaceState(null, "", item.id === "stories" ? "/admin?section=stories" : "/admin");
                       setIsMobileSidebarOpen(false);
                     }}
                     className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${
@@ -451,34 +476,8 @@ export default function AdminDashboardPage() {
                   </button>
                 );
               })}
-            </div>
+            </nav>
 
-            {/* Branch Hubs Quick Status */}
-            <div className="px-6 py-4 mt-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2.5">
-                Salem Showroom Branches
-              </span>
-              <div className="space-y-2">
-                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-between text-xs">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="font-medium text-slate-200">Seelanaickenpatti</span>
-                  </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold">
-                    HQ Showroom
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-between text-xs">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="w-3.5 h-3.5 text-sky-400" />
-                    <span className="font-medium text-slate-200">Madathur Branch</span>
-                  </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 font-bold">
-                    3S Center
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Sidebar Footer: Quick Actions + User Profile */}
@@ -505,33 +504,16 @@ export default function AdminDashboardPage() {
               </button>
             </div>
 
-            {/* Admin User Card */}
-            <div className="p-3 rounded-2xl bg-[#141822] border border-white/[0.08] flex items-center justify-between">
-              <div className="flex items-center space-x-3 overflow-hidden">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs shrink-0">
-                  AM
-                </div>
-                <div className="overflow-hidden">
-                  <div className="text-xs font-bold text-white truncate">
-                    ARS Admin
-                  </div>
-                  <div className="text-[10px] text-slate-400 truncate">
-                    admin@arsmotors.in
-                  </div>
-                </div>
-              </div>
-
               <button
                 onClick={async () => {
                   await fetch("/api/auth/logout", {method:"POST"});
                   router.push("/admin/login");
                 }}
-                className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors shrink-0"
-                title="Logout"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-300 hover:bg-white/10"
+                type="button"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-4 h-4" aria-hidden="true"/> Sign out
               </button>
-            </div>
           </div>
         </div>
       </aside>
@@ -547,11 +529,11 @@ export default function AdminDashboardPage() {
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         {/* Top Header Bar */}
-        <header className="h-18 border-b border-white/[0.08] bg-[#0e121a]/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-20">
+        <header className="h-18 border-b border-white/[0.08] bg-[#0e121a]/80 backdrop-blur-md gap-3 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center space-x-4">
             {/* Mobile Hamburger Toggle */}
             <button
-              onClick={() => setIsMobileSidebarOpen(true)}
+              onClick={() => setIsMobileSidebarOpen(true)} aria-expanded={isMobileSidebarOpen} aria-controls="admin-navigation"
               className="md:hidden p-2 rounded-xl bg-white/[0.06] text-slate-300 hover:text-white"
               title="Open Navigation Menu"
             >
@@ -569,27 +551,28 @@ export default function AdminDashboardPage() {
                 </h1>
               </div>
               <span className="text-[11px] text-slate-400 hidden sm:inline">
-                ARS Motors Authorized Dealership CRM • Salem, Tamil Nadu
+                ARS Motors Salem
               </span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          {activeTab !== "stories" && <div className="flex items-center space-x-3">
             <button
-              onClick={fetchData}
+              onClick={fetchData} disabled={isLoading}
               className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-xs font-bold text-slate-300 transition-colors"
               title="Refresh Data"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Sync Data</span>
+              <span className="hidden sm:inline">{isLoading ? "Refreshing…" : "Refresh"}</span>
             </button>
-          </div>
+          </div>}
         </header>
 
         {/* Inner Content Workspace */}
-        <main className="p-6 md:p-8 space-y-8 flex-1">
+        <main className="mx-auto w-full max-w-[100rem] flex-1 space-y-6 px-4 py-6 sm:px-6 md:px-8">
+          {loadError && activeTab !== "stories" && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-400/30 bg-rose-400/10 p-4 text-sm text-rose-100">{loadError} <button className="font-semibold underline" onClick={fetchData}>Retry</button></div>}
           {/* KPI Strip */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {activeTab === "leads" && <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div className="p-5 rounded-2xl bg-[#121620] border border-white/[0.08] shadow-xs">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
@@ -649,7 +632,7 @@ export default function AdminDashboardPage() {
                 Conversion rate is not measured
               </span>
             </div>
-          </div>
+          </div>}
 
           {/* TAB 1: LEADS & BOOKINGS */}
           {activeTab === "leads" && (

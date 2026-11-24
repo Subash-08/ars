@@ -3,11 +3,31 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: Manrope;
-  src: url("/fonts/manrope-variable.ttf") format("truetype");
+  font-family: "Bricolage Grotesque";
+  src: url("/fonts/bricolage-grotesque.ttf") format("truetype");
   font-style: normal;
   font-weight: 200 800;
   font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans Tamil";
+  src: url("/fonts/noto-sans-tamil.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+html[lang="ta"] { --site-typeface: "Noto Sans Tamil"; }
+html[lang="ta"] :is(h1, h2, h3, h4) { letter-spacing: normal; line-height: 1.24; }
+[lang="ta"]:not(html) { font-family: "Noto Sans Tamil", "Nirmala UI", sans-serif; }
+
+@media (max-width: 799px) {
+  body:has([data-analytics-prompt]) .timed-callback {
+    top: 4.75rem;
+    bottom: auto;
+    max-height: max(8rem, min(56dvh, calc(100dvh - 18rem)));
+  }
 }
 
 @layer utilities {

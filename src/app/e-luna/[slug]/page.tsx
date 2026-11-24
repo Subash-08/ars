@@ -1,3 +1,5 @@
+import { Copy } from "@/components/site-language";
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -52,18 +54,18 @@ export default async function BikePage({ params }: { params: { slug: string } })
       <section className="bg-neutral-50 border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-12 sm:py-20">
           <nav aria-label="Breadcrumb" className="mb-8 text-sm text-neutral-600">
-            <Link href="/" className="underline">Home</Link> / <Link href="/e-luna" className="underline">E-Luna</Link> / {product.name}
+            <Link href="/" className="underline"><Copy>{"Home"}</Copy></Link> / <Link href="/e-luna" className="underline">E-Luna</Link> / {product.name}
           </nav>
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
-              <p className="text-xs uppercase tracking-widest text-emerald-800">{product.category}</p>
+              <p className="text-xs uppercase tracking-widest text-emerald-800"><Copy>{product.category}</Copy></p>
               <h1 className="mt-4 text-4xl sm:text-6xl font-medium tracking-tight">{product.name}</h1>
-              <p className="mt-5 text-neutral-600 leading-relaxed">{product.description}</p>
+              <p className="mt-5 text-neutral-600 leading-relaxed"><Copy>{product.description}</Copy></p>
               <p className="mt-6 text-2xl font-semibold">{product.price}</p>
-              <p className="mt-1 text-sm text-neutral-500">Indicative listed price. Ask for an on-road quote.</p>
+              <p className="mt-1 text-sm text-neutral-500"><Copy>{"Indicative listed price. Ask for an on-road quote."}</Copy></p>
               <div className="mt-7 flex flex-wrap items-center gap-4">
-                <Link className="rounded-full bg-black px-6 py-3 text-sm font-semibold text-white" href={bookingUrl({model: product.name})}>Request a test ride</Link>
-                <a className="text-sm underline underline-offset-4" href="#specifications">See specifications</a>
+                <Link className="rounded-full bg-black px-6 py-3 text-sm font-semibold text-white" href={bookingUrl({model: product.name})}><Copy>{"Request a test ride"}</Copy></Link>
+                <a className="text-sm underline underline-offset-4" href="#specifications"><Copy>{"See specifications"}</Copy></a>
               </div>
             </div>
             <img src={product.image} alt={product.name} width={900} height={675} className="w-full aspect-[4/3] object-cover rounded-3xl"/>
@@ -72,29 +74,31 @@ export default async function BikePage({ params }: { params: { slug: string } })
       </section>
       <section id="specifications" className="max-w-7xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
         <Reveal>
-          <h2 className="text-3xl font-medium tracking-tight">Specifications</h2>
+          <h2 className="text-3xl font-medium tracking-tight"><Copy>{"Specifications"}</Copy></h2>
           <dl className="mt-7 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {spec.map(([label, value]) => <div key={label} className="rounded-2xl border border-neutral-200 p-5">
-              <dt className="text-sm text-neutral-500">{label}</dt><dd className="mt-2 font-medium">{value}</dd>
+              <dt className="text-sm text-neutral-500"><Copy>{label}</Copy></dt><dd className="mt-2 font-medium"><Copy>{value}</Copy></dd>
             </div>)}
           </dl>
-          <p className="mt-5 text-sm text-neutral-600">Confirm the manufacturer specification, actual range, permitted load and written warranty for the exact vehicle before purchase.</p>
+          <p className="mt-5 text-sm text-neutral-600"><Copy>{"Confirm the manufacturer specification, actual range, permitted load and written warranty for the exact vehicle before purchase."}</Copy></p>
         </Reveal>
       </section>
       {details && <>
         <section className="bg-neutral-950 text-white">
           <div className="max-w-7xl mx-auto px-5 sm:px-8 py-14 grid gap-8 md:grid-cols-2">
-            <h2 className="text-3xl font-medium tracking-tight">{details.headline}</h2>
-            <ul className="list-disc pl-5 space-y-3 text-neutral-200">{details.points.map(point => <li key={point}>{point}</li>)}</ul>
+            <h2 className="text-3xl font-medium tracking-tight"><Copy>{details.headline}</Copy></h2>
+            <ul className="list-disc pl-5 space-y-3 text-neutral-200">{details.points.map(point => <li key={point}><Copy>{point}</Copy></li>)}</ul>
           </div>
         </section>
         <ProductStudio variant={details.studio} preview={product.image}/>
       </>}
       <section className="max-w-7xl mx-auto px-5 sm:px-8 py-14 flex flex-wrap gap-6 text-sm font-semibold">
-        <Link className="underline underline-offset-4" href={bookingUrl({model: product.name, inquiry: "brochure"})}>Request the brochure</Link>
-        <Link className="underline underline-offset-4" href="/finance-offers">Finance and exchange</Link>
-        <Link className="underline underline-offset-4" href="/showrooms">Visit a showroom</Link>
-        <Link className="underline underline-offset-4" href="/e-luna#specs-matrix">Compare all bikes</Link>
+        <Link className="underline underline-offset-4" href={bookingUrl({model: product.name, inquiry: "brochure"})}><Copy>{"Request the brochure"}</Copy></Link>
+        <Link className="underline underline-offset-4" href="/finance-offers"><Copy>{"Finance and exchange"}</Copy></Link>
+        <Link className="underline underline-offset-4" href="/showrooms"><Copy>{"Visit a showroom"}</Copy></Link>
+        <Link className="underline underline-offset-4" href="/e-luna#features"><Copy>{"Engineering Highlights"}</Copy></Link>
+        <Link className="underline underline-offset-4" href="/e-luna#technical-specifications"><Copy>{"Technical Specifications"}</Copy></Link>
+        <Link className="underline underline-offset-4" href="/e-luna#specs-matrix"><Copy>{"Compare all bikes"}</Copy></Link>
       </section>
     </SiteShell>
   );

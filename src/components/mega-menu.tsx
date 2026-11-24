@@ -1,4 +1,6 @@
 "use client";
+import { Copy, useCopy } from "@/components/site-language";
+
 
 import React from "react";
 import { Dialog } from "./dialog";
@@ -13,6 +15,7 @@ interface MegaMenuProps {
 }
 
 export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
+  const translate = useCopy();
   const t = translations[lang];
 
   if (!isOpen) return null;
@@ -23,7 +26,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
   };
 
   return (
-    <Dialog title="Site navigation" onClose={onClose}><div className="fixed inset-0 z-50 bg-[#0c0e12]/95 backdrop-blur-2xl text-white overflow-y-auto animate-fadeIn">
+    <Dialog title={translate("Site navigation")} onClose={onClose}><div className="fixed inset-0 z-50 bg-[#0c0e12]/95 backdrop-blur-2xl text-white overflow-y-auto animate-fadeIn">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen flex flex-col justify-between">
         {/* Top Header Bar matching Screenshot 3 */}
         <div className="flex items-center justify-between pb-6 border-b border-white/[0.08]">
@@ -46,20 +49,20 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
               >
                 <span>E-Luna PRO X3</span>
                 <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-sky-500 text-black font-extrabold">
-                  New
+                  <Copy>{"New"}</Copy>
                 </span>
               </button>
               <button
                 onClick={() => handleLinkClick("/e-luna/e-luna-commercial-cargo")}
                 className="hover:text-white"
               >
-                Commercial Cargo
+                <Copy>{"Commercial Cargo"}</Copy>
               </button>
               <button
                 onClick={() => handleLinkClick("/e-luna/e-luna-city-commuter")}
                 className="hover:text-white"
               >
-                City Commuter
+                <Copy>{"City Commuter"}</Copy>
               </button>
             </div>
           </div>
@@ -67,13 +70,13 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] text-slate-200">
               <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{t.locationPill}</span>
+              <span><Copy>{t.locationPill}</Copy></span>
             </div>
 
             <button
               onClick={onClose}
               className="p-2 rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-white transition-colors"
-              title="Close Menu"
+              title={translate("Close Menu")}
             >
               <X className="w-6 h-6" />
             </button>
@@ -85,7 +88,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
           {/* Column 1: Buy Electric Scooters */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
-              Explore E-Luna
+              <Copy>{"Explore E-Luna"}</Copy>
             </h4>
             <ul className="space-y-3 text-sm font-semibold text-slate-200">
               <li>
@@ -93,7 +96,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("electric-family")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  {t.exploreModels}
+                  <Copy>{t.exploreModels}</Copy>
                 </button>
               </li>
               <li>
@@ -101,7 +104,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("showrooms")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  {t.locateDealers}
+                  <Copy>{t.locateDealers}</Copy>
                 </button>
               </li>
               <li>
@@ -109,7 +112,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("specs-matrix")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  {t.compareModels}
+                  <Copy>{t.compareModels}</Copy>
                 </button>
               </li>
               <li>
@@ -117,9 +120,9 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("/book-test-ride?model=Kinetic%20E-Luna%20PRO%20X3")}
                   className="hover:text-emerald-400 transition-colors flex items-center space-x-1 text-left"
                 >
-                  <span>Test Ride the PRO X3</span>
+                  <span><Copy>{"Test Ride the PRO X3"}</Copy></span>
                   <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-500 text-black font-extrabold">
-                    New
+                    <Copy>{"New"}</Copy>
                   </span>
                 </button>
               </li>
@@ -128,7 +131,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("/book-test-ride?model=E-Luna%20Commercial%20Cargo")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Test Ride Commercial Cargo
+                  <Copy>{"Test Ride Commercial Cargo"}</Copy>
                 </button>
               </li>
               <li>
@@ -136,7 +139,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("/book-test-ride?model=E-Luna%20City%20Commuter")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Test Ride City Commuter
+                  <Copy>{"Test Ride City Commuter"}</Copy>
                 </button>
               </li>
               <li>
@@ -144,7 +147,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("/book-test-ride?inquiry=finance")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Finance Enquiries
+                  <Copy>{"Finance Enquiries"}</Copy>
                 </button>
               </li>
             </ul>
@@ -153,7 +156,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
           {/* Column 2: ARS Ecosystem */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
-              Ownership & Charging
+              <Copy>{"Ownership & Charging"}</Copy>
             </h4>
             <ul className="space-y-3 text-sm font-semibold text-slate-200">
               <li>
@@ -161,7 +164,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("service")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Service Enquiries
+                  <Copy>{"Service Enquiries"}</Copy>
                 </button>
               </li>
               <li>
@@ -169,7 +172,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("warranty")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Warranty Guidance
+                  <Copy>{"Warranty Guidance"}</Copy>
                 </button>
               </li>
               <li>
@@ -177,7 +180,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("charging-guide")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Home Charging Guide
+                  <Copy>{"Home Charging Guide"}</Copy>
                 </button>
               </li>
               <li>
@@ -185,7 +188,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("faq-section")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Ownership FAQs
+                  <Copy>{"Ownership FAQs"}</Copy>
                 </button>
               </li>
             </ul>
@@ -194,7 +197,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
           {/* Column 3: Resources */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
-              {t.resources}
+              <Copy>{t.resources}</Copy>
             </h4>
             <ul className="space-y-3 text-sm font-semibold text-slate-200">
               <li>
@@ -202,7 +205,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("savings-calculator")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  {t.savingsCalcNav}
+                  <Copy>{t.savingsCalcNav}</Copy>
                 </button>
               </li>
               <li>
@@ -210,7 +213,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("emi-calculator")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  {t.emiCalcNav}
+                  <Copy>{t.emiCalcNav}</Copy>
                 </button>
               </li>
               <li>
@@ -218,7 +221,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("exchange-estimator")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Request an Exchange Valuation
+                  <Copy>{"Request an Exchange Valuation"}</Copy>
                 </button>
               </li>
               <li>
@@ -226,7 +229,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("features")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Explore E-Luna features
+                  <Copy>{"Explore E-Luna features"}</Copy>
                 </button>
               </li>
               <li>
@@ -234,7 +237,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("/#customer-stories")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Customer Delivery Stories
+                  <Copy>{"Customer Delivery Stories"}</Copy>
                 </button>
               </li>
             </ul>
@@ -243,7 +246,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
           {/* Column 4: More */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
-              Salem Showrooms & Support
+              <Copy>{"Salem Showrooms & Support"}</Copy>
             </h4>
             <ul className="space-y-3 text-sm font-semibold text-slate-200">
               <li>
@@ -251,7 +254,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("/showrooms#showrooms")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  Showroom Hours & Directions
+                  <Copy>{"Showroom Hours & Directions"}</Copy>
                 </button>
               </li>
               <li>
@@ -259,7 +262,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("/showrooms#seelanaickenpatti")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  {t.seelanaickenpattiNav}
+                  <Copy>{t.seelanaickenpattiNav}</Copy>
                 </button>
               </li>
               <li>
@@ -267,7 +270,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("/showrooms#madathur")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  {t.madathurNav}
+                  <Copy>{t.madathurNav}</Copy>
                 </button>
               </li>
               <li>
@@ -276,7 +279,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   className="hover:text-emerald-400 transition-colors flex items-center space-x-1.5 text-left text-emerald-400 font-bold"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Exclusive Salem Offers</span>
+                  <span><Copy>{"Exclusive Salem Offers"}</Copy></span>
                 </button>
               </li>
               <li>
@@ -284,7 +287,7 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   onClick={() => handleLinkClick("about-ars")}
                   className="hover:text-emerald-400 transition-colors text-left"
                 >
-                  About ARS Motors
+                  <Copy>{"About ARS Motors"}</Copy>
                 </button>
               </li>
               <li>
@@ -293,16 +296,16 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                   className="hover:text-emerald-400 transition-colors flex items-center space-x-1.5 text-left text-slate-200"
                 >
                   <Phone className="w-3.5 h-3.5" />
-                  <span>{t.supportNav}</span>
+                  <span><Copy>{t.supportNav}</Copy></span>
                 </a>
               </li>
             </ul>
 
             <div className="mt-8 pt-6 border-t border-white/[0.08]">
               <span className="text-xs text-slate-400 flex items-center space-x-2 font-medium">
-                <span>🇮🇳 India (Tamil Nadu)</span>
+                <span><Copy>{"🇮🇳 India (Tamil Nadu)"}</Copy></span>
                 <span>•</span>
-                <span className="text-emerald-400">Salem Dealership</span>
+                <span className="text-emerald-400"><Copy>{"Salem Dealership"}</Copy></span>
               </span>
             </div>
           </div>
@@ -330,12 +333,12 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
                     E-Luna PRO X3
                   </h5>
                   <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-blue-500 text-white font-extrabold">
-                    New
+                    <Copy>{"New"}</Copy>
                   </span>
                 </div>
-                <p className="text-xs text-neutral-400 mt-0.5">Everyday riding & errands</p>
+                <p className="text-xs text-neutral-400 mt-0.5"><Copy>{"Everyday riding & errands"}</Copy></p>
                 <span className="text-xs font-bold text-white mt-1 block">
-                  View bike details
+                  <Copy>{"View bike details"}</Copy>
                 </span>
               </div>
             </div>
@@ -349,17 +352,17 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
               <div className="w-24 h-18 rounded-xl bg-neutral-900 overflow-hidden flex items-center justify-center border border-white/10">
                 <img
                   src="/assets/bikes/cargo-heavy-hd.jpg"
-                  alt="Commercial Cargo"
+                  alt={translate("Commercial Cargo")}
                   className="w-full h-full object-cover p-0.5 group-hover:scale-105 transition-transform"
                 />
               </div>
               <div>
                 <h5 className="font-extrabold text-sm text-white group-hover:text-neutral-200 transition-colors">
-                  Commercial Cargo
+                  <Copy>{"Commercial Cargo"}</Copy>
                 </h5>
-                <p className="text-xs text-neutral-400 mt-0.5">Delivery & business use</p>
+                <p className="text-xs text-neutral-400 mt-0.5"><Copy>{"Delivery & business use"}</Copy></p>
                 <span className="text-xs font-bold text-white mt-1 block">
-                  View bike details
+                  <Copy>{"View bike details"}</Copy>
                 </span>
               </div>
             </div>
@@ -373,17 +376,17 @@ export function MegaMenu({ lang, isOpen, onClose, onNavigate }: MegaMenuProps) {
               <div className="w-24 h-18 rounded-xl bg-neutral-900 overflow-hidden flex items-center justify-center border border-white/10">
                 <img
                   src="/assets/bikes/commuter-family-hd.jpg"
-                  alt="City Commuter"
+                  alt={translate("City Commuter")}
                   className="w-full h-full object-cover p-0.5 group-hover:scale-105 transition-transform"
                 />
               </div>
               <div>
                 <h5 className="font-extrabold text-sm text-white group-hover:text-neutral-200 transition-colors">
-                  City Commuter
+                  <Copy>{"City Commuter"}</Copy>
                 </h5>
-                <p className="text-xs text-neutral-400 mt-0.5">Local trips & family errands</p>
+                <p className="text-xs text-neutral-400 mt-0.5"><Copy>{"Local trips & family errands"}</Copy></p>
                 <span className="text-xs font-bold text-white mt-1 block">
-                  View bike details
+                  <Copy>{"View bike details"}</Copy>
                 </span>
               </div>
             </div>

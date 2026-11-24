@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { Copy, useCopy } from "./site-language";
 const roundedBox=(width:number,height:number,depth:number)=>new RoundedBoxGeometry(width,height,depth,3,Math.min(width,height,depth)*0.22);
 
 export type VariantType = "pro_x3" | "cargo" | "commuter";
@@ -44,6 +45,7 @@ export function Eluna3DCanvas({
   onHotspotClick,
   onInteracted,
 }: Eluna3DCanvasProps) {
+  const copy = useCopy();
   const mountRef = useRef<HTMLDivElement>(null);
   const [webglError,setWebglError] = useState(false);
 
@@ -891,14 +893,14 @@ export function Eluna3DCanvas({
       if(e.key==="Home"){targetThetaRef.current=Math.PI/4;targetRadiusRef.current=3.6;targetPhiRef.current=Math.PI/2.45;}
     }
   };
-  if(webglError)return <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8"><img src="/assets/bikes/studio-yellow-hd.jpg" alt="E-Luna product photograph" className="max-h-[60%] object-contain"/><p role="status" className="text-sm text-center">Interactive 3D is unavailable on this device. Use Product Photos above.</p></div>;
+  if(webglError)return <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8"><img src="/assets/bikes/studio-yellow-hd.jpg" alt={copy("E-Luna product photograph")} className="max-h-[60%] object-contain"/><p role="status" className="text-sm text-center"><Copy>{"Interactive 3D is unavailable on this device. Use Product Photos above."}</Copy></p></div>;
 
   return (
     <div
       ref={mountRef}
       tabIndex={0}
       role="group"
-      aria-label="Interactive vehicle illustration. Drag horizontally or use left and right arrow keys to rotate. Up and down arrows zoom. Home resets the camera."
+      aria-label={copy("Interactive vehicle illustration. Drag horizontally or use left and right arrow keys to rotate. Up and down arrows zoom. Home resets the camera.")}
       onKeyDown={handleKeyDown}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -924,8 +926,8 @@ export function Eluna3DCanvas({
                 top: `${spot.y}px`,
               }}
               className="absolute z-20 -translate-x-1/2 -translate-y-1/2 group pointer-events-auto transition-transform hover:scale-125"
-              title={`${spot.name} - ${spot.spec}`}
-              aria-label={`Explore ${spot.name}`}
+              title={`${copy(spot.name)} - ${copy(spot.spec)}`}
+              aria-label={copy("Explore {part}").replace("{part}", copy(spot.name))}
             >
               <div className="relative flex items-center justify-center">
                 <span className="absolute inline-flex h-7 w-7 rounded-full bg-emerald-400 opacity-25" />

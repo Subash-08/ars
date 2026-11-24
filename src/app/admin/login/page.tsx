@@ -1,21 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, ShieldCheck, ArrowRight, Zap } from "lucide-react";
+import { ArrowRight, Zap } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState(false);
-
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [expired, setExpired] = useState(false);
+  useEffect(() => {
+    setExpired(new URLSearchParams(location.search).has("expired"));
+  }, []);
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); setBusy(true); setError(false); setMessage("");
-    try { const res = await fetch("/api/auth/login", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({password:pin}) }); const data=await res.json(); if(!res.ok) throw new Error(data.error || "Login failed"); router.replace("/admin"); }
-    catch(err) { setError(true); setMessage(err instanceof Error ? err.message : "Login failed. Try again."); }
-    finally { setBusy(false); }
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not sign in. Please try again.");
+      const section = new URLSearchParams(location.search).get("section");
+      router.replace(section === "stories" ? "/admin?section=stories" : "/admin");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Could not sign in. Please try again.");
+      setBusy(false);
+    }
   };
 
   return (
@@ -25,34 +41,22 @@ export default function AdminLoginPage() {
           <Zap className="w-7 h-7" />
         </div>
 
-        <h2 className="text-2xl font-black text-white">ARS Motors Salem</h2>
-        <p className="text-xs text-slate-400 mt-1 mb-6">
-          Staff CRM & Lead Management Portal
-        </p>
+        <h1 className="text-2xl font-black text-white">ARS Motors Salem</h1>
+        <p className="mt-1 mb-6 text-sm text-slate-400">Admin sign-in</p>
+        {expired && <p role="status" className="mb-4 rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2 text-sm text-amber-100">Your session expired. Sign in to continue.</p>}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-slate-300 block mb-2 text-left">
-              Staff password
+            <label htmlFor="admin-password" className="text-xs font-bold text-slate-300 block mb-2 text-left">
+              Password
             </label>
-            <div className="relative">
-              <input
-                type="password" autoComplete="current-password"
-                required
-                placeholder="Enter your staff password"
-                value={pin}
-                onChange={(e) => {
-                  setPin(e.target.value);
-                  setError(false);
-                }}
-                className="w-full bg-[#1b202d] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-center text-white focus:outline-none focus:border-emerald-400 font-mono tracking-widest text-lg"
-              />
-              <Lock className="w-4 h-4 text-slate-500 absolute right-4 top-3.5" />
-            </div>
+            <input id="admin-password" name="password" type="password" autoComplete="current-password" required
+              value={password} onChange={e => { setPassword(e.target.value); setMessage(""); }}
+              className="w-full rounded-xl border border-white/10 bg-[#1b202d] px-4 py-3 text-base text-white focus:border-emerald-400 focus:outline-none"/>
           </div>
 
-          {error && (
-            <p className="text-xs font-semibold text-rose-400">
+          {message && (
+            <p role="alert" className="text-sm font-semibold text-rose-400">
               {message}
             </p>
           )}
@@ -61,14 +65,11 @@ export default function AdminLoginPage() {
             type="submit" disabled={busy}
             className="w-full py-3.5 px-6 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-2"
           >
-            <span>Unlock CRM Dashboard</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>{busy ? "Signing in…" : "Sign in"}</span>
+            <ArrowRight className="w-4 h-4" aria-hidden="true"/>
           </button>
         </form>
 
-        <div className="mt-6 pt-4 border-t border-white/[0.08] text-[11px] text-slate-500">
-          Showroom Branches: Seelanaickenpatti & Madathur
-        </div>
       </div>
     </div>
   );

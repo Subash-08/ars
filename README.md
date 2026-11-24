@@ -46,7 +46,7 @@ Set a unique `ADMIN_PASSWORD` of at least 12 characters and an `AUTH_SECRET` of 
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-No default staff PIN is accepted. Missing configuration disables staff login. `/admin/login` creates a signed, expiring HttpOnly session cookie; private API reads and writes require it. Mutations validate the same origin. Use HTTPS in production. Rotating `AUTH_SECRET` invalidates existing sessions. This is a single shared staff account; individual accounts/roles require a later authentication integration. Abuse limits are best effort per process; use a shared service when running multiple instances.
+Open `/admin` directly and enter the configured password. Successful sign-in creates a signed, expiring HttpOnly session cookie. Private API reads and writes require it, and mutations validate the same origin. Use HTTPS in production. Rotating `AUTH_SECRET` invalidates existing sessions. Abuse limits operate per process. Use a shared service when running multiple instances.
 
 ## Customer stories
 

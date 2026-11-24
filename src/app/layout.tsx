@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import { SiteLanguageProvider } from "@/components/site-language";
+import { languageCookie, siteLanguage } from "@/lib/site-language";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -63,6 +66,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const language = siteLanguage(cookies().get(languageCookie)?.value);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "AutoDealer",
@@ -125,10 +129,10 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang={language} className="scroll-smooth">
       <head>
         <link
-          href="/fonts/manrope-variable.ttf"
+          href="/fonts/bricolage-grotesque.ttf"
           rel="preload"
           as="font"
           type="font/ttf"
@@ -140,7 +144,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-white text-neutral-900 font-sans antialiased">
-        {children}
+        <SiteLanguageProvider initialLanguage={language}>{children}</SiteLanguageProvider>
       </body>
     </html>
   );
