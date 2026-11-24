@@ -127,11 +127,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-          rel="stylesheet"
+          href="/fonts/manrope-variable.ttf"
+          rel="preload"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
         />
         <script
           type="application/ld+json"

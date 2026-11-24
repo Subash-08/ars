@@ -1,5 +1,7 @@
 import type { Config } from "tailwindcss";
 
+const siteFonts = ["Manrope", "system-ui", '"Nirmala UI"', "sans-serif"];
+
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -22,7 +24,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        sans: siteFonts,
+        mono: siteFonts,
       },
     },
   },

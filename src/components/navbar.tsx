@@ -28,14 +28,14 @@ export function Navbar({
   return (
     <>
       <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-neutral-100 transition-all text-neutral-900 h-16 sm:h-18">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-2 min-[380px]:px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           {/* Left: Pure Ather Brand & Vehicle Links */}
           <div className="flex items-center space-x-8 lg:space-x-12">
             <a
               href="/"
               className="flex items-center space-x-2 group cursor-pointer"
             >
-              <span className="text-xl sm:text-2xl font-black tracking-widest text-neutral-950 uppercase font-sans">
+              <span className="whitespace-nowrap text-base min-[380px]:text-lg sm:text-2xl font-black tracking-[0.08em] min-[380px]:tracking-widest text-neutral-950 uppercase font-sans">
                 ARS MOTORS
               </span>
             </a>
@@ -67,7 +67,7 @@ export function Navbar({
           </div>
 
           {/* Right Action Stack matching Ather Reference exactly */}
-          <div className="flex items-center gap-2 sm:gap-4 lg:gap-6 text-xs font-semibold text-neutral-700">
+          <div className="flex items-center gap-1.5 min-[380px]:gap-2 sm:gap-4 lg:gap-6 text-xs font-semibold text-neutral-700">
             {/* Showrooms Dropdown */}
             <button
               onClick={() => onNavigate("showrooms")}
@@ -90,9 +90,9 @@ export function Navbar({
             <div className="relative">
               <button
                 onClick={() => onNavigate("showrooms")}
-                className="flex items-center space-x-1.5 text-xs font-semibold text-neutral-800 bg-white hover:bg-neutral-50 border border-neutral-300 px-3.5 py-1.5 rounded-full transition-colors shadow-2xs"
+                className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 bg-white hover:bg-neutral-50 border border-neutral-300 px-2.5 min-[380px]:px-3.5 py-1.5 rounded-full transition-colors shadow-2xs"
               >
-                <span>Salem</span>
+                <span className="sr-only min-[380px]:not-sr-only">Salem</span>
                 <MapPin className="w-3 h-3 text-neutral-600" />
               </button>
 
@@ -121,7 +121,7 @@ export function Navbar({
             }}>
               <button
                 type="button"
-                aria-label="Tamil language option"
+                aria-label="Language options, English active"
                 aria-expanded={showTamilNotice}
                 aria-controls="tamil-language-notice"
                 onClick={() => {
@@ -130,11 +130,12 @@ export function Navbar({
                 }}
                 className="whitespace-nowrap rounded-full border border-neutral-300 bg-white px-2.5 py-1.5 hover:bg-neutral-50"
               >
-                <span lang="ta">தமிழ்</span>
+                <span>EN</span><span aria-hidden="true" className="mx-1 text-neutral-400">/</span><span lang="ta">தமிழ்</span>
               </button>
               <p id="tamil-language-notice" hidden={!showTamilNotice} role="status"
                 className="absolute right-0 top-10 z-50 w-44 rounded-xl border border-neutral-200 bg-white px-3 py-2 font-normal leading-relaxed shadow-lg">
-                Tamil content is coming soon.
+                <strong className="block font-semibold">English · Active</strong>
+                <span className="mt-1 block text-neutral-600"><span lang="ta">தமிழ்</span> · Coming soon</span>
               </p>
             </div>
 
