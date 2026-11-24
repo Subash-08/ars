@@ -90,4 +90,6 @@ Three.js resource management follows the [official disposal guidance](https://th
 
 SQLite requires a persistent writable volume and a suitable single-instance deployment. A stateless/serverless deployment needs an appropriate persistent database integration; setting only a Vercel deployment URL does not provide that storage. Confirm backups, retention, credentials and final commercial content before going live. No deployment was performed by this implementation.
 
+When a database read fails, the public catalogue and bike detail pages show the bundled model references and direct visitors to call the showroom for current pricing or a test ride. Home uses the bundled, labeled demo delivery stories and testimonials if the stories query fails. A successful database query controls published content, including an empty collection. Lead submissions, current offers and dashboard functions still require a working database.
+
 Prisma generation runs at install time (`postinstall`) rather than on every build, avoiding Windows DLL replacement errors while the live preview is running. Run `npx prisma generate` after changing the schema.

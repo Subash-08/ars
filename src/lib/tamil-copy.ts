@@ -59,7 +59,7 @@ export const tamilCopy: Readonly<Record<string, string>> = {
   "Battery*": "பேட்டரி*",
   "Our Salem team can help with configurations, prices and a test ride.": "மாடல்கள், விலை மற்றும் சோதனை ஓட்டம் குறித்து சேலம் குழு உதவும்.",
   "Contact the showroom": "விற்பனை நிலையத்தைத் தொடர்புகொள்ளுங்கள்",
-  "The live catalogue is temporarily unavailable": "வாகனப் பட்டியல் தற்காலிகமாகக் கிடைக்கவில்லை",
+  "Call for a quote or test ride": "விலை விவரம் அல்லது சோதனை ஓட்டத்துக்கு அழையுங்கள்",
   "Ask us about current availability": "தற்போது கிடைக்கும் வாகனங்களைக் கேளுங்கள்",
   "*Existing dealership listings are indicative. Confirm the exact manufacturer variant, configuration, price, range and warranty in your written quote. Actual range depends on load, riding and conditions.": "*பட்டியலிட்ட விவரங்கள் வழிகாட்டுதலுக்காக மட்டுமே. மாடல், அமைப்பு, விலை, பயண தூரம், உத்தரவாதம் ஆகியவற்றை எழுத்துப்பூர்வ விலைப்பட்டியலில் உறுதிசெய்யுங்கள். உண்மையான பயண தூரம் சுமை, ஓட்டும் முறை மற்றும் சூழலைப் பொறுத்தது.",
   "Built around your day": "உங்கள் அன்றாடத் தேவைகளுக்காக",

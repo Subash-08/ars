@@ -1,8 +1,17 @@
 import { Prisma } from "@prisma/client";
+import demoStories from "../../prisma/customer-stories.demo.json";
 import { prisma } from "./prisma";
 import type { CustomerStory } from "./story-types";
 
 type StoryRow = Omit<CustomerStory, "imageUrl"> & { imagePath: string | null; hasImage: number | bigint };
+
+const referenceStories: CustomerStory[] = demoStories.map(([id, customerName, location, testimonial, kind], order) => ({
+  id, customerName, location, testimonial, order,
+  kind: kind === "delivery" ? "delivery" : "testimonial",
+  isActive: true,
+  isDemo: true,
+  imageUrl: `/assets/customer-stories/${id}.webp`,
+}));
 
 export async function listStories(admin = false): Promise<CustomerStory[]> {
   const published = admin ? Prisma.empty : Prisma.sql`WHERE isActive = true`;
@@ -20,11 +29,10 @@ export async function listStories(admin = false): Promise<CustomerStory[]> {
   }));
 }
 
-export async function publicStories() {
+export async function publicStories(): Promise<CustomerStory[]> {
   try {
     return await listStories();
-  } catch (error) {
-    console.error("Could not load customer stories", error instanceof Error ? error.message : error);
-    return [];
+  } catch {
+    return referenceStories;
   }
 }

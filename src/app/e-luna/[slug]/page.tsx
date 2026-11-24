@@ -61,10 +61,14 @@ export default async function BikePage({ params }: { params: { slug: string } })
               <p className="text-xs uppercase tracking-widest text-emerald-800"><Copy>{product.category}</Copy></p>
               <h1 className="mt-4 text-4xl sm:text-6xl font-medium tracking-tight">{product.name}</h1>
               <p className="mt-5 text-neutral-600 leading-relaxed"><Copy>{product.description}</Copy></p>
-              <p className="mt-6 text-2xl font-semibold">{product.price}</p>
-              <p className="mt-1 text-sm text-neutral-500"><Copy>{"Indicative listed price. Ask for an on-road quote."}</Copy></p>
+              {product.price && <>
+                <p className="mt-6 text-2xl font-semibold">{product.price}</p>
+                <p className="mt-1 text-sm text-neutral-500"><Copy>{"Indicative listed price. Ask for an on-road quote."}</Copy></p>
+              </>}
               <div className="mt-7 flex flex-wrap items-center gap-4">
-                <Link className="rounded-full bg-black px-6 py-3 text-sm font-semibold text-white" href={bookingUrl({model: product.name})}><Copy>{"Request a test ride"}</Copy></Link>
+                {product.price
+                  ? <Link className="rounded-full bg-black px-6 py-3 text-sm font-semibold text-white" href={bookingUrl({model: product.name})}><Copy>{"Request a test ride"}</Copy></Link>
+                  : <a className="rounded-full bg-black px-6 py-3 text-sm font-semibold text-white" href="tel:+919025380626"><Copy>{"Call for a quote or test ride"}</Copy></a>}
                 <a className="text-sm underline underline-offset-4" href="#specifications"><Copy>{"See specifications"}</Copy></a>
               </div>
             </div>

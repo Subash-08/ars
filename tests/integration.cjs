@@ -61,6 +61,7 @@ async function expect(url,status,method='GET',body,authenticated=false,origin){c
   assert.match(await (await request('/e-luna')).text(),/QA Vehicle/);checks++;
   await expect('/api/admin/products',200,'PUT',{id:added.product.id,isPublished:false},true);
   assert.doesNotMatch(await (await request('/e-luna')).text(),/<h3[^>]*>QA Vehicle/);checks++;
+  assert.doesNotMatch(await (await request('/e-luna')).text(), /id="kinetic-e-luna-pro-x3"/);
   const addedOffer=await (await expect('/api/admin/offers',200,'POST',{title:'QA offer',discount:'QA benefit',validTill:'Valid till Dec 31, 2099',isActive:true},true)).json();
   offers=await (await expect('/api/offers',200)).json();assert.equal(offers.offers.length,1);
   await expect('/api/admin/offers',200,'PUT',{id:addedOffer.offer.id,isActive:false},true);
@@ -122,5 +123,22 @@ async function expect(url,status,method='GET',body,authenticated=false,origin){c
   const badBase='http://localhost:3101';let failureReady=false;
   for(let i=0;i<60;i++){try{if((await fetch(badBase+'/privacy')).ok){failureReady=true;break;}}catch{}await new Promise(r=>setTimeout(r,500));}
   assert.ok(failureReady);const failure=await fetch(badBase+'/api/leads',{method:'POST',headers:{'Content-Type':'application/json',Origin:badBase},body:JSON.stringify(lead)});assert.equal(failure.status,503);assert.equal((await failure.json()).success,false);checks++;
+  const fallbackHome = await fetch(badBase + '/');
+  assert.equal(fallbackHome.status, 200); checks++;
+  const fallbackHtml = await fallbackHome.text();
+  assert.match(fallbackHtml, /id="testimonials"/);
+  assert.match(fallbackHtml, /id="customer-stories"/);
+  assert.match(fallbackHtml, /showroom-green\.webp/);
+  assert.match(fallbackHtml, /Demo · AI-generated photo/);
+  for (const slug of ['kinetic-e-luna-pro-x3', 'e-luna-commercial-cargo', 'e-luna-city-commuter']) {
+    assert.match(fallbackHtml, new RegExp('id="' + slug + '"'));
+    const bikePage = await fetch(badBase + '/e-luna/' + slug);
+    assert.equal(bikePage.status, 200); checks++;
+    const bikeHtml = await bikePage.text();
+    assert.match(bikeHtml, /Call for a quote or test ride/);
+    assert.doesNotMatch(bikeHtml, /Indicative listed price\. Ask for an on-road quote\./);
+  }
+  const unknownBike = await fetch(badBase + '/e-luna/qa-unknown');
+  assert.equal(unknownBike.status, 404); checks++;
   console.log(`PASS: ${checks} isolated production HTTP checks. Test data: ${dir}`);
 }finally{server?.kill();failureServer?.kill();fs.closeSync(log);}})().catch(error=>{console.error(error);process.exitCode=1;});

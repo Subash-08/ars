@@ -39,56 +39,7 @@ async function main() {
   console.log("Categories seeded.");
 
   // 3. Seed Products
-  const products = [
-    {
-      name: "Kinetic E-Luna PRO X3",
-      slug: "kinetic-e-luna-pro-x3",
-      category: "Flagship Commuter",
-      price: "₹69,990*",
-      range: "110 km",
-      speed: "50 km/h",
-      payload: "150 kg",
-      battery: "2.3 kWh Advanced Li-ion",
-      motor: "1.2 kW BLDC / 2.2 kW Peak",
-      warranty: "Confirm component coverage with showroom",
-      image: "/assets/bikes/hires-yellow.jpg",
-      description: "India's legendary workhorse, completely electrified. 110 km certified range, 2.3 kWh battery, 5 signature metallic finishes.",
-      isPublished: true,
-      order: 1,
-    },
-    {
-      name: "E-Luna Commercial Cargo",
-      slug: "e-luna-commercial-cargo",
-      category: "Commercial Heavy-Duty",
-      price: "₹74,990*",
-      range: "100 km",
-      speed: "45 km/h",
-      payload: "150 kg",
-      battery: "2.3 kWh Advanced Li-ion",
-      motor: "1.2 kW BLDC",
-      warranty: "Confirm component coverage with showroom",
-      image: "/assets/bikes/cargo-heavy-hd.jpg",
-      description: "Built for businesses and delivery fleets. Quick-release detachable rear seat transforms into a flat heavy-duty steel carrier bed.",
-      isPublished: true,
-      order: 2,
-    },
-    {
-      name: "E-Luna City Commuter",
-      slug: "e-luna-city-commuter",
-      category: "Family & Daily Commute",
-      price: "₹64,990*",
-      range: "90 km",
-      speed: "45 km/h",
-      payload: "130 kg",
-      battery: "1.7 kWh Li-ion",
-      motor: "1.2 kW BLDC",
-      warranty: "Confirm component coverage with showroom",
-      image: "/assets/bikes/commuter-family-hd.jpg",
-      description: "Designed for family comfort. Features ergonomic dual cushioned split seats, protective steel saree guard, and smooth telescopic suspension.",
-      isPublished: true,
-      order: 3,
-    },
-  ];
+  const products = require("./products.seed.json");
 
   for (const prod of products) {
     await prisma.product.upsert({
