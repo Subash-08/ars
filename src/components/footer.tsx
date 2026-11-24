@@ -1,103 +1,87 @@
 "use client";
 
-import React from "react";
-import { translations, Language } from "@/lib/translations";
-import { Phone, Mail, MapPin } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Clock3, MapPin, Phone } from "lucide-react";
+import type { Language } from "@/lib/translations";
 
-interface FooterProps {
-  lang: Language;
-}
+const explore = [
+  ["Explore E-Luna", "/e-luna"],
+  ["Finance & offers", "/finance-offers"],
+  ["Running cost calculator", "/finance-offers#savings-calculator"],
+  ["EMI calculator", "/finance-offers#emi-calculator"],
+  ["Ownership & service", "/ownership"],
+  ["About ARS Motors", "/about"],
+];
 
-export function Footer({ lang }: FooterProps) {
-  const t = translations[lang];
+const branches = [
+  {
+    name: "Seelanaickenpatti",
+    address: "3/345, Seelanaickenpatti Bypass, Near Dharan Hospital, Salem – 636 201.",
+    number: "+91 90 25 38 06 26",
+    tel: "+919025380626",
+    hours: "Daily · 9:00 AM – 8:30 PM",
+    href: "/showrooms#seelanaickenpatti",
+  },
+  {
+    name: "Madathur",
+    address: "Elampillai to Chinnappampatti Road, Madathur Bus Stop, Salem District – 636 501.",
+    number: "+91 94 43 24 07 52",
+    tel: "+919443240752",
+    hours: "Daily · 9:00 AM – 8:00 PM",
+    href: "/showrooms#madathur",
+  },
+];
 
+const policies = [
+  ["Privacy", "/privacy"],
+  ["Booking terms", "/booking-terms"],
+  ["Offer terms", "/offer-terms"],
+  ["Staff portal", "/admin/login"],
+];
+
+const textLink = "text-sm text-neutral-700 transition-colors hover:text-emerald-950 hover:underline underline-offset-4";
+
+export function Footer({ lang }: { lang: Language }) {
   return (
-    <footer className="bg-neutral-950 border-t border-neutral-850 py-16 text-neutral-400 text-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-neutral-800">
-          {/* Col 1 & 2: Brand & Mission */}
-          <div className="md:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <span className="text-xl font-black tracking-widest text-white uppercase font-sans">
-                ARS MOTORS
-              </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-emerald-400 border border-white/10 uppercase tracking-wider">
-                Authorized Dealership
-              </span>
-            </div>
-            <p className="text-neutral-400 max-w-md leading-relaxed mb-4">
-              Authorized 3S Dealership for Kinetic Green E-Luna in Salem, Tamil Nadu. Delivering certified electric vehicles, authorized spare parts, battery maintenance, and finance enquiries through our Salem team.
-            </p>
-            <div className="text-[11px] text-neutral-500 font-medium">
-              Kinetic Green Energy & Power Solutions • Planet @ Our Heart
-            </div>
-          </div>
-
-          {/* Col 3: Main Showroom */}
+    <footer lang={lang} className="border-t border-[#dbe5dd] bg-[#f4f7f3] text-[#14251d]">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="grid gap-9 py-12 sm:grid-cols-2 lg:grid-cols-[1.15fr_0.85fr_2fr] lg:gap-12 lg:py-16">
           <div>
-            <span className="text-xs font-semibold text-white uppercase tracking-wider block mb-3">
-              Main Showroom
-            </span>
-            <p className="text-neutral-400 leading-relaxed mb-2">
-              3/345, Seelanaickenpatti Bypass, Near Dharan Hospital, Salem – 636 201.
-            </p>
-            <div className="text-neutral-300 font-mono font-medium">
-              +91 90 25 38 06 26
-            </div>
-            <div className="text-[11px] text-neutral-500 mt-1">
-              Mon–Sun: 9:00 AM – 8:30 PM
-            </div>
+            <Link href="/" className="inline-block text-2xl font-black tracking-[0.13em]">ARS MOTORS</Link>
+            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-900">Kinetic Green · Salem</p>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-neutral-700">Explore E-Luna, arrange a test ride, or speak to our Salem team about service and spare parts.</p>
+            <Link href="/book-test-ride" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#14251d] px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-950">
+              Request a test ride <ArrowUpRight size={15} aria-hidden="true"/>
+            </Link>
           </div>
-
-          {/* Col 4: Branch Showroom */}
-          <div>
-            <span className="text-xs font-semibold text-white uppercase tracking-wider block mb-3">
-              Madathur Branch
-            </span>
-            <p className="text-neutral-400 leading-relaxed mb-2">
-              Elampillai to Chinnappampatti Road, Madathur Bus Stop, Salem District – 636 501.
-            </p>
-            <div className="text-neutral-300 font-mono font-medium">
-              +91 94 43 24 07 52
-            </div>
-            <div className="text-[11px] text-neutral-500 mt-1">
-              Mon–Sun: 9:00 AM – 8:00 PM
+          <nav aria-label="Explore ARS Motors">
+            <h2 className="text-sm font-bold">Explore</h2>
+            <ul className="mt-4 grid gap-3">
+              {explore.map(([label, href]) => <li key={href}><Link href={href} className={textLink}>{label}</Link></li>)}
+            </ul>
+          </nav>
+          <div className="sm:col-span-2 lg:col-span-1">
+            <h2 className="text-sm font-bold">Visit us in Salem</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {branches.map(branch => (
+                <address key={branch.href} className="rounded-2xl border border-[#dbe5dd] bg-white p-4 text-sm not-italic">
+                  <Link href={branch.href} className="inline-flex items-center gap-2 font-semibold hover:underline">
+                    <MapPin size={15} aria-hidden="true" className="shrink-0 text-emerald-900"/>{branch.name}<ArrowUpRight size={13} aria-hidden="true"/>
+                  </Link>
+                  <p className="mt-3 text-xs leading-relaxed text-neutral-600">{branch.address}</p>
+                  <a className="mt-3 flex items-center gap-2 font-semibold hover:underline" href={`tel:${branch.tel}`}><Phone size={14} aria-hidden="true"/>{branch.number}</a>
+                  <p className="mt-2 flex items-center gap-2 text-xs text-neutral-600"><Clock3 size={14} aria-hidden="true"/>{branch.hours}</p>
+                </address>
+              ))}
             </div>
           </div>
         </div>
-
-        {/* Bottom Bar: Copyright & Navigation */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <p className="text-[11px] text-neutral-500">
-            © 2026 ARS Motors Salem. All rights reserved. Authorized Kinetic Green Partner.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-neutral-400">
-            <a href="/e-luna" className="hover:text-white transition-colors">
-              Vehicles
-            </a>
-            <span>•</span>
-            <a href="/finance-offers#savings-calculator" className="hover:text-white transition-colors">
-              Savings Calculator
-            </a>
-            <span>•</span>
-            <a href="/finance-offers#emi-calculator" className="hover:text-white transition-colors">
-              EMI Finance
-            </a>
-            <span>•</span>
-            <a href="/showrooms" className="hover:text-white transition-colors">
-              Showrooms
-            </a>
-            <span>•</span>
-            <a href="/ownership" className="hover:text-white transition-colors">Ownership</a>
-            <a href="/about" className="hover:text-white transition-colors">About</a>
-            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
-            <a href="/booking-terms" className="hover:text-white transition-colors">Booking terms</a>
-            <a href="/offer-terms" className="hover:text-white transition-colors">Offer terms</a>
-            <button type="button" onClick={() => window.dispatchEvent(new Event("ars-preferences"))} className="hover:text-white transition-colors">Analytics preferences</button>
-            <a href="/admin/login" className="hover:text-white transition-colors">
-              Staff Portal
-            </a>
-          </div>
+        <div className="flex flex-col gap-4 border-t border-[#dbe5dd] pb-24 pt-6 text-xs text-neutral-600 sm:pb-8 lg:flex-row lg:justify-between">
+          <p>© 2026 ARS Motors Salem. All rights reserved.</p>
+          <nav aria-label="Policies and staff access" className="flex flex-wrap gap-x-5 gap-y-3">
+            {policies.map(([label, href]) => <Link href={href} key={href} className="hover:underline">{label}</Link>)}
+            <button type="button" className="hover:underline" onClick={() => window.dispatchEvent(new Event("ars-preferences"))}>Analytics preferences</button>
+          </nav>
         </div>
       </div>
     </footer>

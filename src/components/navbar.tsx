@@ -23,6 +23,7 @@ export function Navbar({
   const t = translations[lang];
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [showLocationTooltip, setShowLocationTooltip] = useState(true);
+  const [showTamilNotice, setShowTamilNotice] = useState(false);
 
   return (
     <>
@@ -66,7 +67,7 @@ export function Navbar({
           </div>
 
           {/* Right Action Stack matching Ather Reference exactly */}
-          <div className="flex items-center space-x-4 sm:space-x-6 text-xs font-semibold text-neutral-700">
+          <div className="flex items-center gap-2 sm:gap-4 lg:gap-6 text-xs font-semibold text-neutral-700">
             {/* Showrooms Dropdown */}
             <button
               onClick={() => onNavigate("showrooms")}
@@ -113,6 +114,28 @@ export function Navbar({
                   </button>
                 </div>
               )}
+            </div>
+
+            <div className="relative" onKeyDown={event => {
+              if (event.key === "Escape") setShowTamilNotice(false);
+            }}>
+              <button
+                type="button"
+                aria-label="Tamil language option"
+                aria-expanded={showTamilNotice}
+                aria-controls="tamil-language-notice"
+                onClick={() => {
+                  setShowTamilNotice(open => !open);
+                  setShowLocationTooltip(false);
+                }}
+                className="whitespace-nowrap rounded-full border border-neutral-300 bg-white px-2.5 py-1.5 hover:bg-neutral-50"
+              >
+                <span lang="ta">தமிழ்</span>
+              </button>
+              <p id="tamil-language-notice" hidden={!showTamilNotice} role="status"
+                className="absolute right-0 top-10 z-50 w-44 rounded-xl border border-neutral-200 bg-white px-3 py-2 font-normal leading-relaxed shadow-lg">
+                Tamil content is coming soon.
+              </p>
             </div>
 
             {/* Minimalist 2-Bar Hamburger Menu Button matching Ather */}

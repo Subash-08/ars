@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, ImageOff, MapPin } from "lucide-react";
 import { Reveal } from "./reveal";
 import type { CustomerStory } from "@/lib/story-types";
 import styles from "./customer-briefs.module.css";
@@ -66,36 +66,56 @@ function DeliveryStories({ stories }: { stories: CustomerStory[] }) {
     });
   }
   return (
-    <section id="customer-stories" className="bg-neutral-950 text-white py-16 sm:py-24">
+    <section id="customer-stories" aria-labelledby="delivery-title" className="border-t border-neutral-200 bg-[#f4f7f3] py-16 text-neutral-950 sm:py-24">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <Reveal>
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
-              <h2 className="text-3xl sm:text-5xl font-medium tracking-tight">Customer delivery stories</h2>
-              <p className="mt-4 text-sm text-neutral-300">Meet the people and everyday journeys behind each showroom handover.</p>
+              <h2 id="delivery-title" className="text-3xl sm:text-5xl font-medium tracking-tight">Customer delivery stories</h2>
+              <p className="mt-4 text-sm text-neutral-600">Meet the people and everyday journeys behind each showroom handover.</p>
             </div>
-            {stories.length > 1 && <div className="flex gap-2">
-              <button type="button" aria-label="Previous stories" onClick={() => scroll(-1)} className="rounded-full border border-white/30 p-3 hover:bg-white/15 focus-visible:outline-white"><ArrowLeft size={18}/></button>
-              <button type="button" aria-label="Next stories" onClick={() => scroll(1)} className="rounded-full border border-white/30 p-3 hover:bg-white/15 focus-visible:outline-white"><ArrowRight size={18}/></button>
+            {stories.length > 1 && <div className={`flex gap-2 ${stories.length <= 3 ? "lg:hidden" : ""}`}>
+              <button type="button" aria-label="Previous stories" onClick={() => scroll(-1)} className="rounded-full border border-emerald-900/20 bg-white p-3 hover:bg-emerald-50"><ArrowLeft size={18}/></button>
+              <button type="button" aria-label="Next stories" onClick={() => scroll(1)} className="rounded-full border border-emerald-900/20 bg-white p-3 hover:bg-emerald-50"><ArrowRight size={18}/></button>
             </div>}
           </div>
         </Reveal>
         <div ref={rail} tabIndex={0} role="region" aria-label="Delivery story gallery" className="mt-8 flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4">
           {stories.map(story => (
-            <article key={story.id} className="group snap-start relative isolate aspect-[4/5] w-[min(82vw,350px)] shrink-0 overflow-hidden rounded-3xl border border-white/15 bg-neutral-800">
-              <img src={story.imageUrl} alt={story.isDemo ? "Illustrated electric bike showroom handover" : `Showroom handover for ${story.customerName}`}
-                width={640} height={800} loading="lazy" className="absolute inset-0 size-full object-cover motion-safe:transition-transform motion-safe:duration-700 motion-safe:group-hover:scale-105"/>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent"/>
-              {story.isDemo && <p className="absolute top-4 left-4 rounded-full bg-black/75 px-3 py-1 text-xs">Demo · AI-generated photo</p>}
-              <div className="absolute inset-x-0 bottom-0 p-6">
-                <p className="text-sm leading-relaxed text-neutral-100">{story.testimonial}</p>
-                <h3 className="mt-3 text-xl font-semibold">{story.customerName}</h3>
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-200"><MapPin size={14} aria-hidden="true"/>{story.location}</p>
+            <article key={story.id} className="flex w-[min(82vw,350px)] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white lg:w-[calc((100%_-_3rem)/3)]">
+              <DeliveryPhoto key={story.imageUrl} story={story}/>
+              <div className="flex flex-1 flex-col border-t border-neutral-100 px-5 py-5 sm:p-6">
+                <h3 className="text-lg font-semibold tracking-tight">{story.customerName}</h3>
+                <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-emerald-900"><MapPin size={14} aria-hidden="true"/>{story.location}</p>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-600">{story.testimonial}</p>
+                {story.isDemo && <p className="mt-auto pt-4 text-xs text-neutral-500">Demo · AI-generated photo</p>}
               </div>
             </article>
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function DeliveryPhoto({ story }: { story: CustomerStory }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <div className="grid aspect-[4/5] place-items-center bg-[#edf2ed]">
+      {story.imageUrl && !failed ? (
+        <img
+          src={story.imageUrl}
+          alt={story.isDemo ? "Illustrated E-Luna showroom handover" : `Showroom handover for ${story.customerName}`}
+          width={800}
+          height={1000}
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailed(true)}
+          className="h-full w-full object-contain"
+        />
+      ) : (
+        <p className="flex items-center gap-2 text-sm text-neutral-600"><ImageOff size={18} aria-hidden="true"/> Photo unavailable</p>
+      )}
+    </div>
   );
 }
