@@ -11,6 +11,11 @@ const topics = ["Test ride", "Price and availability", "Finance and exchange", "
 const popupDelay = 10_000;
 const visitKey = "ars-callback-visit-v2";
 
+function isBikeTourInView() {
+  const tour = document.querySelector("[data-bike-tour-track]")?.getBoundingClientRect();
+  return !!tour && tour.top < window.innerHeight * .72 && tour.bottom > window.innerHeight * .3;
+}
+
 export function CallbackModal({ allowTimed }: { allowTimed: boolean }) {
   const copy = useCopy();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -44,6 +49,7 @@ export function CallbackModal({ allowTimed }: { allowTimed: boolean }) {
         return;
       }
       if (Date.now() - started < popupDelay || document.visibilityState !== "visible") return;
+      if (isBikeTourInView()) return;
       if (document.querySelector('dialog[open], [aria-modal="true"], [data-language-picker][aria-expanded="true"]')) return;
       if (document.activeElement?.closest('input, textarea, select, [contenteditable="true"]')) return;
 
@@ -76,6 +82,11 @@ export function CallbackModal({ allowTimed }: { allowTimed: boolean }) {
 
   useEffect(() => {
     if (!timed) return;
+    const clearTourView = () => {
+      if (!isBikeTourInView() || dialog.current?.contains(document.activeElement)) return;
+      dialog.current?.removeAttribute("open");
+      setTimed(false);
+    };
     const escape = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || event.defaultPrevented || document.querySelector('[aria-modal="true"], dialog:modal, [data-language-picker][aria-expanded="true"]')) return;
       const focusedInside = dialog.current?.contains(document.activeElement);
@@ -84,7 +95,11 @@ export function CallbackModal({ allowTimed }: { allowTimed: boolean }) {
       setTimed(false);
     };
     document.addEventListener("keydown", escape);
-    return () => document.removeEventListener("keydown", escape);
+    window.addEventListener("scroll", clearTourView, { passive: true });
+    return () => {
+      document.removeEventListener("keydown", escape);
+      window.removeEventListener("scroll", clearTourView);
+    };
   }, [timed]);
 
   function openModal() {

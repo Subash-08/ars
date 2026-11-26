@@ -12,6 +12,7 @@ type Feature = { value: Localized; label: Localized; description?: Localized; un
 type Chapter = {
   id: string;
   yaw: number;
+  shift: number;
   label: Localized;
   title: Localized;
   text: Localized;
@@ -24,10 +25,10 @@ type Chapter = {
 
 const chapters: Chapter[] = [
   {
-    id: "meet-e-luna", yaw: 0,
+    id: "meet-e-luna", yaw: 0, shift: .17,
     label: { en: "Front view", ta: "முன்புறம்" },
     title: { en: "Meet the E‑Luna.", ta: "E‑Luna அறிமுகம்" },
-    text: { en: "See the headlamp, mirrors and easy step-through shape from the front. Then compare the models for your daily ride.", ta: "முன்புற விளக்கு, கண்ணாடிகள், எளிதாக ஏற உதவும் வடிவம் ஆகியவற்றைப் பாருங்கள். உங்கள் அன்றாடப் பயணத்துக்கு ஏற்ற மாடலை ஒப்பிடுங்கள்." },
+    text: { en: "Get a clear look at the headlamp and mirrors, then compare the E‑Luna models for your daily ride.", ta: "முன்புற விளக்கையும் கண்ணாடிகளையும் பாருங்கள். உங்கள் அன்றாடப் பயணத்துக்கு ஏற்ற E‑Luna மாடல்களை ஒப்பிடுங்கள்." },
     view: { en: "Front view of the E-Luna", ta: "E-Luna-வின் முன்புறக் காட்சி" },
     features: [
       { value: { en: "110", ta: "110" }, unit: { en: "km", ta: "கி.மீ." }, label: { en: "Listed range", ta: "பட்டியலிட்ட பயணத் தூரம்" } },
@@ -37,7 +38,7 @@ const chapters: Chapter[] = [
     link: { href: "/e-luna", en: "Compare E-Luna models", ta: "E-Luna மாடல்களை ஒப்பிடுங்கள்" },
   },
   {
-    id: "space-for-your-day", yaw: 90,
+    id: "space-for-your-day", yaw: 90, shift: 0,
     label: { en: "First side", ta: "ஒரு பக்கம்" },
     title: { en: "Room to ride.", ta: "வசதியான பயணம்" },
     text: { en: "The full side view shows the space between the seat and handlebars.", ta: "இருக்கைக்கும் கைப்பிடிக்கும் இடையிலான இடத்தைப் பக்கவாட்டில் பார்க்கலாம்." },
@@ -49,7 +50,7 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    id: "a-closer-look", yaw: 180,
+    id: "a-closer-look", yaw: 180, shift: -.17,
     label: { en: "Rear view", ta: "பின்புறம்" },
     title: { en: "See the rear details.", ta: "பின்புற விவரங்கள்" },
     text: { en: "The rear angle brings the tail lamp and wheel assembly into view.", ta: "பின்புறக் கோணத்தில் விளக்கும் சக்கர அமைப்பும் தெளிவாகத் தெரியும்." },
@@ -62,7 +63,7 @@ const chapters: Chapter[] = [
     link: { href: "/e-luna#technical-specifications", en: "View specifications", ta: "விவரக்குறிப்புகளைப் பாருங்கள்" },
   },
   {
-    id: "see-it-in-salem", yaw: 270,
+    id: "see-it-in-salem", yaw: 270, shift: 0,
     label: { en: "Opposite side", ta: "மறுபக்கம்" },
     title: { en: "Try it in Salem.", ta: "சேலத்தில் ஓட்டிப் பாருங்கள்" },
     text: { en: "Try the seating and handling, then ask our team about the configuration and on-road quote.", ta: "இருக்கை வசதியையும் ஓட்டும் அனுபவத்தையும் அறிந்து, மாடல் மற்றும் முழு விலையை எங்கள் குழுவிடம் கேளுங்கள்." },
@@ -78,9 +79,14 @@ const showrooms = [
 type InteractiveScene = Awaited<ReturnType<typeof import("./home-bike-tour-scene").createBikeTourScene>>;
 const lastChapter = chapters.length - 1;
 
+function smoothStep(start: number, end: number, value: number) {
+  const phase = Math.min(1, Math.max(0, (value - start) / (end - start)));
+  return phase * phase * (3 - 2 * phase);
+}
+
 function FeatureStat({ feature, language }: { feature: Feature; language: keyof Localized }) {
   return (
-    <dl className={styles.stat}>
+    <dl className={styles.stat} data-feature={feature.pin ? "" : undefined}>
       <dt>{feature.label[language]}</dt>
       <dd className={styles.statValue}>
         {feature.pin && <span className={styles.pinIndex} aria-hidden="true">{feature.pin}</span>}
@@ -112,10 +118,10 @@ export function HomeBikeTour() {
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const compact = window.matchMedia("(max-width: 58rem)");
-    const shortScreen = window.matchMedia("(max-width: 48rem) and (max-height: 670px), (max-height: 470px)");
+    const shortScreen = window.matchMedia("(max-width: 58rem) and (max-height: 670px), (max-height: 590px)");
     const useStills = () => motion.matches || shortScreen.matches;
     const panels = Array.from(track.querySelectorAll<HTMLElement>("[data-tour-panel]"));
-    const dots = Array.from(track.querySelectorAll<HTMLElement>("[data-tour-dot]"));
+    const views = Array.from(track.querySelectorAll<HTMLElement>("[data-tour-view]"));
     const controller = new AbortController();
     let scene: InteractiveScene | undefined;
     let visible = false;
@@ -125,7 +131,7 @@ export function HomeBikeTour() {
 
     const paint = () => {
       frame = 0;
-      if (!visible || document.hidden || useStills()) return;
+      if (!visible || document.hidden || useStills() || !scene?.available()) return;
       const stageBounds = stage.getBoundingClientRect();
       const trackBounds = track.getBoundingClientRect();
       if (!stageBounds.height || stageBounds.bottom < 0 || stageBounds.top > window.innerHeight) return;
@@ -137,29 +143,35 @@ export function HomeBikeTour() {
       const span = panels[index + 1].offsetTop - panels[index].offsetTop;
       const phase = Math.min(1, Math.max(0, (position - panels[index].offsetTop) / Math.max(1, span)));
       const progress = index + phase;
-      const ease = phase * phase * (3 - 2 * phase);
+      const ease = smoothStep(.14, .86, phase);
       const nearest = Math.round(progress);
       const mobile = compact.matches;
+      const travel = mobile ? .18 : Math.min(1, 1600 / stageBounds.width);
+      // Give both text rails clearance while the full side profile is visible.
+      const slide = from.shift === 0 ? smoothStep(.3, .84, phase) : smoothStep(.16, .7, phase);
+      const shift = (from.shift + (to.shift - from.shift) * slide) * travel;
+      stage.style.setProperty("--bike-offset", `${shift * 100}%`);
       if (nearest !== active) {
         active = nearest;
         stage.dataset.chapter = String(active + 1);
-        dots.forEach((dot, i) => dot.toggleAttribute("data-current", i === active));
+        views.forEach((view, i) => view.toggleAttribute("data-current", i === active));
       }
       panels.forEach((panel, i) => {
         const distance = progress - i;
-        const current = Math.abs(distance) < .5;
-        const fade = Math.max(0, Math.min(1, (.5 - Math.abs(distance)) / .38));
-        const align = current ? stageBounds.top - panel.getBoundingClientRect().top : 0;
-        panel.style.setProperty("--copy-opacity", String(fade * fade * (3 - 2 * fade)));
-        panel.style.setProperty("--copy-travel", `${align + (current ? distance * -16 : 0)}px`);
+        const current = i === nearest;
+        const fade = 1 - smoothStep(.32, .5, Math.abs(distance));
+        const align = current ? stageBounds.top - panel.getBoundingClientRect().top - distance * 18 : 0;
+        panel.style.setProperty("--copy-opacity", String(fade));
+        panel.style.setProperty("--copy-travel", `${align}px`);
         panel.toggleAttribute("data-tour-visible", current);
       });
 
       const yaw = from.yaw + (to.yaw - from.yaw) * ease;
       const pins = chapters[nearest].pins;
-      const markerOpacity = pins ? Math.max(0, 1 - Math.abs(progress - nearest) * 5) : 0;
+      const markerOpacity = pins ? 1 - smoothStep(.14, .31, Math.abs(progress - nearest)) : 0;
       markers.style.opacity = String(markerOpacity);
-      scene?.draw(yaw, mobile, markerOpacity > 0 ? pins : undefined);
+      scene.draw(yaw, shift, mobile, markerOpacity > 0 ? pins : undefined);
+      if (!track.hasAttribute("data-live")) track.dataset.live = "";
     };
 
     const schedule = () => {
@@ -193,10 +205,7 @@ export function HomeBikeTour() {
           return;
         }
         scene = result;
-        if (!useStills()) {
-          track.dataset.live = "";
-          schedule();
-        }
+        schedule();
       } catch {
         if (!controller.signal.aborted) fail();
       } finally {
@@ -218,10 +227,8 @@ export function HomeBikeTour() {
       if (useStills()) {
         delete track.dataset.live;
         resetCopy();
-      } else if (scene?.available()) {
-        track.dataset.live = "";
-        schedule();
-      } else if (visible) void start();
+      } else if (scene?.available()) schedule();
+      else if (visible) void start();
     };
 
     nearing.observe(track);
@@ -266,7 +273,7 @@ export function HomeBikeTour() {
         {chapters.map(chapter => <a key={chapter.id} href={`#bike-tour-${chapter.id}`}>{chapter.label[language]}</a>)}
       </nav>
 
-      <div ref={trackRef} className={styles.track}>
+      <div ref={trackRef} className={styles.track} data-bike-tour-track>
         <div ref={stageRef} className={styles.stage} aria-hidden="true">
           <div className={styles.glow}/>
           <div className={styles.art}>
@@ -277,13 +284,16 @@ export function HomeBikeTour() {
             </div>
           </div>
           <div className={styles.progress}>
-            {chapters.map((chapter, i) => <span key={chapter.title.en} data-tour-dot data-current={i === 0 ? "" : undefined}/>)}
+            {chapters.map((chapter, i) => (
+              <span key={chapter.id} data-tour-view data-current={i === 0 ? "" : undefined}>{chapter.label[language]}</span>
+            ))}
           </div>
         </div>
 
         <div className={styles.chapters}>
           {chapters.map((chapter, i) => (
-            <article key={chapter.id} id={`bike-tour-${chapter.id}`} data-tour-panel className={styles.panel}>
+            <article key={chapter.id} id={`bike-tour-${chapter.id}`} tabIndex={-1} data-tour-panel
+              data-layout={chapter.shift > 0 ? "bike-right" : chapter.shift < 0 ? "bike-left" : "center"} className={styles.panel}>
               <div className={styles.still}>
                 <img src={`/3d/tour-${chapter.id}.webp`} alt={chapter.view[language]} width={900} height={660} loading="lazy"/>
               </div>
@@ -301,10 +311,8 @@ export function HomeBikeTour() {
                 {chapter.features && (
                   <>
                     <div className={styles.firstStat}><FeatureStat feature={chapter.features[0]} language={language}/></div>
-                    <div className={styles.context}>
-                      <FeatureStat feature={chapter.features[1]} language={language}/>
-                      {chapter.note && <p className={styles.note}>{chapter.note[language]}</p>}
-                    </div>
+                    <div className={styles.context}><FeatureStat feature={chapter.features[1]} language={language}/></div>
+                    {chapter.note && <p className={styles.note}>{chapter.note[language]}</p>}
                   </>
                 )}
                 {i === lastChapter && (

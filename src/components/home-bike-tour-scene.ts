@@ -53,6 +53,7 @@ export async function createBikeTourScene(
   camera.lookAt(0, 0, 0);
 
   let model: Object3D | undefined;
+  const modelSize = new Vector3();
   let lost = false;
   let disposed = false;
   const handleLoss = (event: Event) => {
@@ -80,12 +81,13 @@ export async function createBikeTourScene(
 
     const bounds = new Box3().setFromObject(model);
     const centre = bounds.getCenter(new Vector3());
-    const { x, y, z } = bounds.getSize(new Vector3());
-    const length = Math.max(x, y, z);
+    bounds.getSize(modelSize);
+    const length = Math.max(modelSize.x, modelSize.y, modelSize.z);
     if (!Number.isFinite(length) || length <= 0) throw new Error("The E-Luna model has no visible geometry.");
 
     model.position.copy(centre).multiplyScalar(-1 / length);
     model.scale.setScalar(1 / length);
+    modelSize.divideScalar(length);
     model.traverse(object => {
       if (!(object instanceof Mesh)) return;
       if (!object.geometry.getAttribute("normal")) object.geometry.computeVertexNormals();
@@ -102,19 +104,21 @@ export async function createBikeTourScene(
   }
 
   const projected = new Vector3();
+  const art = host.parentElement;
   let width = 0;
   let height = 0;
   let framedForMobile = false;
   let previousYaw = NaN;
+  let previousShift = NaN;
   let previousPins: keyof typeof markerPoints | undefined;
 
-  function draw(yaw: number, mobile: boolean, pins?: keyof typeof markerPoints) {
+  function draw(yaw: number, shift: number, mobile: boolean, pins?: keyof typeof markerPoints) {
     if (lost || disposed) return;
     const nextWidth = host.clientWidth;
     const nextHeight = host.clientHeight;
     if (!nextWidth || !nextHeight) return;
     const resized = nextWidth !== width || nextHeight !== height || framedForMobile !== mobile;
-    if (!resized && yaw === previousYaw && pins === previousPins) return;
+    if (!resized && yaw === previousYaw && shift === previousShift && pins === previousPins) return;
 
     if (resized) {
       width = nextWidth;
@@ -133,9 +137,18 @@ export async function createBikeTourScene(
     }
 
     previousYaw = yaw;
+    previousShift = shift;
     previousPins = pins;
     pivot.rotation.y = yaw * Math.PI / 180;
+    pivot.position.x = shift * (camera.right - camera.left);
     renderer.render(scene, camera);
+
+    if (art) {
+      projected.set(0, -modelSize.y / 2, 0).project(camera);
+      const footprint = modelSize.x * Math.abs(Math.cos(pivot.rotation.y)) + modelSize.z * Math.abs(Math.sin(pivot.rotation.y));
+      art.style.setProperty("--floor-top", `${(1 - projected.y) * 50}%`);
+      art.style.setProperty("--floor-span", `${90 * footprint / (camera.right - camera.left)}%`);
+    }
 
     if (pins) {
       markerPoints[pins].forEach((point, i) => {
