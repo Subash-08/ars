@@ -67,6 +67,7 @@
 
 .track {
   --frame: max(32rem, calc(100svh - var(--tour-top) - .5rem));
+  --chapter-span: calc(var(--frame) * 1.35);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   isolation: isolate;
@@ -150,17 +151,30 @@
 .track[data-live] .progress { display: flex; }
 .progress span:not([data-current]) { display: none; }
 
-.chapters { position: relative; pointer-events: none; }
+.chapters { position: relative; pointer-events: none; z-index: 1; }
 
 .panel {
   display: grid;
   position: relative;
   scroll-margin-top: var(--tour-top);
   min-height: var(--frame);
+}
+.track:not([data-static]) .panel:not(:last-child) { min-height: var(--chapter-span); }
+.panel:focus { outline: none; }
+
+.fallback, .stageCard {
+  display: grid;
   align-items: center;
   padding: 2.2rem max(clamp(1.6rem, 4.4vw, 4rem), calc((100% - 82rem) / 2));
 }
-.panel:focus { outline: none; }
+
+.overlay { display: none; position: absolute; inset: 0; z-index: 3; grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
+.track[data-live] .overlay { display: grid; }
+.stageCard { grid-area: 1 / 1; visibility: hidden; opacity: var(--copy-opacity, 0); }
+.stageCard[data-tour-visible] { visibility: visible; }
+.stageCard[inert] a { pointer-events: none; }
+.track[data-live] .stage { z-index: 2; }
+.track[data-live] .fallback { display: none; }
 
 .copy {
   --rail: clamp(11rem, 21vw, 18rem);
@@ -173,11 +187,8 @@
   align-items: center;
 }
 
-.track[data-live] .copy { opacity: var(--copy-opacity, 1); transform: translateY(var(--copy-travel, 0px)); }
-.track[data-live] .panel:not([data-tour-visible]) .copy { visibility: hidden; }
-
 @media (width > 58rem) {
-  .track[data-live] .panel:is([data-layout="bike-right"], [data-layout="bike-left"]) .copy {
+  .stageCard:is([data-layout="bike-right"], [data-layout="bike-left"]) .copy {
     width: clamp(19rem, 35vw, 29rem);
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-areas: "lead lead" "first context";
@@ -188,11 +199,11 @@
     background: #f9fbf2ba;
     box-shadow: 0 1.1rem 2.8rem #243f2710;
   }
-  .track[data-live] [data-layout="bike-left"] .copy { justify-self: end; }
-  .track[data-live] .panel:is([data-layout="bike-right"], [data-layout="bike-left"]) .context { align-self: start; }
-  .track:not([data-live]) .note { grid-column: 3; }
-  .track[data-live] [data-layout="bike-left"] [data-feature] .statValue { font-size: clamp(1.1rem, 2.05vw, 2.5rem); }
-  .track[data-live] [data-layout="bike-left"] [data-feature] .statValue .pinIndex { width: 1.25rem; height: 1.25rem; }
+  .stageCard[data-layout="bike-left"] .copy { justify-self: end; }
+  .stageCard:is([data-layout="bike-right"], [data-layout="bike-left"]) .context { align-self: start; }
+  .fallback .note { grid-column: 3; }
+  .stageCard[data-layout="bike-left"] [data-feature] .statValue { font-size: clamp(1.1rem, 2.05vw, 2.5rem); }
+  .stageCard[data-layout="bike-left"] [data-feature] .statValue .pinIndex { width: 1.25rem; height: 1.25rem; }
 }
 
 .lead { grid-area: lead; min-width: 0; }
@@ -262,9 +273,8 @@
 .branches a svg, .primary svg, .secondary svg { flex: none; }
 .branches a:hover { text-decoration: underline; }
 
-.still { position: absolute; inset: 0; display: grid; place-items: center; opacity: 1; transition: opacity 220ms ease; }
+.still { position: absolute; inset: 0; display: grid; place-items: center; }
 .still img { width: min(55%, 44rem); height: 90%; object-fit: contain; transform: translateY(-5%); }
-.track[data-live] .still { opacity: 0; visibility: hidden; }
 
 :global([lang="ta"]) .tour :is(h2, h3, .statValue, .eyebrow, .stat dt, .branchTitle) {
   letter-spacing: normal;
@@ -282,7 +292,7 @@
 @media (max-width: 58rem) {
   .tour { --tour-top: 4.25rem; }
   .track { --frame: max(39rem, calc(100svh - var(--tour-top) - .5rem)); }
-  .panel { align-content: start; padding: calc(var(--frame) * .48) clamp(1.1rem, 6vw, 3.5rem) 3.75rem; }
+  .fallback, .stageCard { align-content: start; padding: calc(var(--frame) * .48) clamp(1.1rem, 6vw, 3.5rem) 3.75rem; }
   .art, .still { top: 0; bottom: auto; height: 45%; }
   .floor { filter: blur(.75rem); }
   .copy {
@@ -293,7 +303,7 @@
     gap: .65rem 1rem;
     align-items: start;
   }
-  .panel:last-child .copy { grid-template-areas: "lead lead" "context context"; }
+  :is(.panel, .stageCard):last-child .copy { grid-template-areas: "lead lead" "context context"; }
   .context { align-self: start; }
   .lead h3 { font-size: clamp(1.65rem, 4vw, 2.55rem); }
   :global([lang="ta"]) .lead h3 { font-size: clamp(1.2rem, 4.1vw, 1.85rem); }
@@ -310,7 +320,8 @@
   .markers span, .pinIndex { width: 1.15rem; height: 1.15rem; font-size: .57rem; }
   .progress { top: 44%; bottom: auto; padding-block: .23rem; }
   .still img { width: min(92%, 32rem); transform: none; }
-  .track[data-static] .panel { min-height: 0; gap: .55rem; padding-top: 1rem; }
+  .track[data-static] .panel { min-height: 0; }
+  .track[data-static] .fallback { gap: .55rem; padding-top: 1rem; }
   .track[data-static] .still { position: relative; inset: auto; height: auto; }
   .track[data-static] .still img { width: min(100%, 23rem); height: auto; }
 }
@@ -324,9 +335,9 @@
   .track { display: block; }
   .stage { display: none; }
   .chapters { display: grid; }
-  .panel { min-height: 0; gap: .55rem; padding: 1rem 1.1rem 1.8rem; border-top: 1px solid #d8e3d8; background: #eef4ea; }
-  .still, .track[data-live] .still { position: relative; inset: auto; height: auto; opacity: 1; visibility: visible; }
+  .panel, .track:not([data-static]) .panel:not(:last-child) { min-height: 0; }
+  .panel { border-top: 1px solid #d8e3d8; background: #eef4ea; }
+  .fallback, .track[data-live] .fallback { display: grid; gap: .55rem; padding: 1rem 1.1rem 1.8rem; }
+  .still { position: relative; inset: auto; height: auto; }
   .still img { width: min(100%, 23rem); height: auto; transform: none; }
-  .copy, .track[data-live] .copy { opacity: 1; transform: none; }
-  .track[data-live] .panel:not([data-tour-visible]) .copy { visibility: visible; }
 }

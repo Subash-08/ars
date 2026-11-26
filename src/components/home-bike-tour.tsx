@@ -98,6 +98,45 @@ function FeatureStat({ feature, language }: { feature: Feature; language: keyof 
   );
 }
 
+function ChapterCopy({ chapter, language }: { chapter: Chapter; language: keyof Localized }) {
+  const isFinal = chapter === chapters[lastChapter];
+  return (
+    <div className={styles.copy}>
+      <div className={styles.lead}>
+        <h3>{chapter.title[language]}</h3>
+        <p>{chapter.text[language]}</p>
+        {chapter.link && (
+          <Link href={chapter.link.href} className={isFinal ? styles.primary : styles.secondary}>
+            {chapter.link[language]}
+            {isFinal ? <ArrowDownRight size={18} aria-hidden="true"/> : <ArrowUpRight size={17} aria-hidden="true"/>}
+          </Link>
+        )}
+      </div>
+      {chapter.features && (
+        <>
+          <div className={styles.firstStat}><FeatureStat feature={chapter.features[0]} language={language}/></div>
+          <div className={styles.context}><FeatureStat feature={chapter.features[1]} language={language}/></div>
+          {chapter.note && <p className={styles.note}>{chapter.note[language]}</p>}
+        </>
+      )}
+      {isFinal && (
+        <div className={styles.context}>
+          <p className={styles.branchTitle}>{language === "ta" ? "சேலம் விற்பனை நிலையங்கள்" : "Salem showrooms"}</p>
+          <ul className={styles.branches}>
+            {showrooms.map(branch => (
+              <li key={branch.id}>
+                <Link href={`/showrooms#${branch.id}`}>
+                  <MapPin size={16} aria-hidden="true"/>{branch[language]}<ArrowUpRight size={15} aria-hidden="true"/>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function HomeBikeTour() {
   const { language } = useSiteLanguage();
   const trackRef = useRef<HTMLDivElement>(null);
@@ -120,7 +159,7 @@ export function HomeBikeTour() {
     const compact = window.matchMedia("(max-width: 58rem)");
     const shortScreen = window.matchMedia("(max-width: 58rem) and (max-height: 670px), (max-height: 590px)");
     const useStills = () => motion.matches || shortScreen.matches;
-    const panels = Array.from(track.querySelectorAll<HTMLElement>("[data-tour-panel]"));
+    const cards = Array.from(stage.querySelectorAll<HTMLElement>("[data-tour-card]"));
     const views = Array.from(track.querySelectorAll<HTMLElement>("[data-tour-view]"));
     const controller = new AbortController();
     let scene: InteractiveScene | undefined;
@@ -135,14 +174,12 @@ export function HomeBikeTour() {
       const stageBounds = stage.getBoundingClientRect();
       const trackBounds = track.getBoundingClientRect();
       if (!stageBounds.height || stageBounds.bottom < 0 || stageBounds.top > window.innerHeight) return;
-      const position = Math.max(0, stageBounds.top - trackBounds.top);
-      let index = 0;
-      while (index < lastChapter - 1 && position >= panels[index + 1].offsetTop) index++;
+      const chapterSpan = (trackBounds.height - stageBounds.height) / lastChapter;
+      const progress = Math.min(lastChapter, Math.max(0, stageBounds.top - trackBounds.top) / Math.max(1, chapterSpan));
+      const index = Math.min(lastChapter - 1, Math.floor(progress));
       const from = chapters[index];
       const to = chapters[index + 1];
-      const span = panels[index + 1].offsetTop - panels[index].offsetTop;
-      const phase = Math.min(1, Math.max(0, (position - panels[index].offsetTop) / Math.max(1, span)));
-      const progress = index + phase;
+      const phase = progress - index;
       const ease = smoothStep(.14, .86, phase);
       const nearest = Math.round(progress);
       const mobile = compact.matches;
@@ -152,23 +189,24 @@ export function HomeBikeTour() {
       const shift = (from.shift + (to.shift - from.shift) * slide) * travel;
       stage.style.setProperty("--bike-offset", `${shift * 100}%`);
       if (nearest !== active) {
+        const previousCard = cards[active];
+        if (previousCard) {
+          previousCard.removeAttribute("data-tour-visible");
+          previousCard.setAttribute("inert", "");
+        }
         active = nearest;
+        cards[active].setAttribute("data-tour-visible", "");
         stage.dataset.chapter = String(active + 1);
         views.forEach((view, i) => view.toggleAttribute("data-current", i === active));
       }
-      panels.forEach((panel, i) => {
-        const distance = progress - i;
-        const current = i === nearest;
-        const fade = 1 - smoothStep(.32, .5, Math.abs(distance));
-        const align = current ? stageBounds.top - panel.getBoundingClientRect().top - distance * 18 : 0;
-        panel.style.setProperty("--copy-opacity", String(fade));
-        panel.style.setProperty("--copy-travel", `${align}px`);
-        panel.toggleAttribute("data-tour-visible", current);
-      });
+      const distance = Math.abs(progress - nearest);
+      const fade = 1 - smoothStep(.32, .5, distance);
+      cards[active].style.setProperty("--copy-opacity", String(fade));
+      cards[active].toggleAttribute("inert", fade < .6);
 
       const yaw = from.yaw + (to.yaw - from.yaw) * ease;
       const pins = chapters[nearest].pins;
-      const markerOpacity = pins ? 1 - smoothStep(.14, .31, Math.abs(progress - nearest)) : 0;
+      const markerOpacity = pins ? 1 - smoothStep(.14, .31, distance) : 0;
       markers.style.opacity = String(markerOpacity);
       scene.draw(yaw, shift, mobile, markerOpacity > 0 ? pins : undefined);
       if (!track.hasAttribute("data-live")) track.dataset.live = "";
@@ -179,10 +217,11 @@ export function HomeBikeTour() {
     };
 
     const resetCopy = () => {
-      for (const panel of panels) {
-        panel.style.removeProperty("--copy-opacity");
-        panel.style.removeProperty("--copy-travel");
-        panel.removeAttribute("data-tour-visible");
+      active = -1;
+      for (const card of cards) {
+        card.style.removeProperty("--copy-opacity");
+        card.removeAttribute("data-tour-visible");
+        card.setAttribute("inert", "");
       }
     };
 
@@ -274,64 +313,41 @@ export function HomeBikeTour() {
       </nav>
 
       <div ref={trackRef} className={styles.track} data-bike-tour-track>
-        <div ref={stageRef} className={styles.stage} aria-hidden="true">
-          <div className={styles.glow}/>
-          <div className={styles.art}>
+        <div className={styles.chapters}>
+          {chapters.map(chapter => (
+            <article key={chapter.id} id={`bike-tour-${chapter.id}`} tabIndex={-1} className={styles.panel}>
+              <div className={styles.fallback}>
+                <div className={styles.still}>
+                  <img src={`/3d/tour-${chapter.id}.webp`} alt={chapter.view[language]} width={900} height={660} loading="lazy"/>
+                </div>
+                <ChapterCopy chapter={chapter} language={language}/>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div ref={stageRef} className={styles.stage}>
+          <div className={styles.glow} aria-hidden="true"/>
+          <div className={styles.art} aria-hidden="true">
             <div className={styles.floor} />
             <div ref={canvasRef} className={styles.canvas} />
             <div ref={markerRef} className={styles.markers}>
               <span>1</span><span>2</span>
             </div>
           </div>
-          <div className={styles.progress}>
+          <div className={styles.progress} aria-hidden="true">
             {chapters.map((chapter, i) => (
               <span key={chapter.id} data-tour-view data-current={i === 0 ? "" : undefined}>{chapter.label[language]}</span>
             ))}
           </div>
-        </div>
-
-        <div className={styles.chapters}>
-          {chapters.map((chapter, i) => (
-            <article key={chapter.id} id={`bike-tour-${chapter.id}`} tabIndex={-1} data-tour-panel
-              data-layout={chapter.shift > 0 ? "bike-right" : chapter.shift < 0 ? "bike-left" : "center"} className={styles.panel}>
-              <div className={styles.still}>
-                <img src={`/3d/tour-${chapter.id}.webp`} alt={chapter.view[language]} width={900} height={660} loading="lazy"/>
-              </div>
-              <div className={styles.copy}>
-                <div className={styles.lead}>
-                  <h3>{chapter.title[language]}</h3>
-                  <p>{chapter.text[language]}</p>
-                  {chapter.link && (
-                    <Link href={chapter.link.href} className={i === lastChapter ? styles.primary : styles.secondary}>
-                      {chapter.link[language]}
-                      {i === lastChapter ? <ArrowDownRight size={18} aria-hidden="true"/> : <ArrowUpRight size={17} aria-hidden="true"/>}
-                    </Link>
-                  )}
-                </div>
-                {chapter.features && (
-                  <>
-                    <div className={styles.firstStat}><FeatureStat feature={chapter.features[0]} language={language}/></div>
-                    <div className={styles.context}><FeatureStat feature={chapter.features[1]} language={language}/></div>
-                    {chapter.note && <p className={styles.note}>{chapter.note[language]}</p>}
-                  </>
-                )}
-                {i === lastChapter && (
-                  <div className={styles.context}>
-                    <p className={styles.branchTitle}>{tamil ? "சேலம் விற்பனை நிலையங்கள்" : "Salem showrooms"}</p>
-                    <ul className={styles.branches}>
-                      {showrooms.map(branch => (
-                        <li key={branch.id}>
-                          <Link href={`/showrooms#${branch.id}`}>
-                            <MapPin size={16} aria-hidden="true"/>{branch[language]}<ArrowUpRight size={15} aria-hidden="true"/>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </article>
-          ))}
+          <div className={styles.overlay}>
+            {chapters.map(chapter => (
+              <article key={chapter.id} className={styles.stageCard} data-tour-card
+                data-layout={chapter.shift > 0 ? "bike-right" : chapter.shift < 0 ? "bike-left" : "center"}>
+                <ChapterCopy chapter={chapter} language={language}/>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
       <div id="after-bike-tour" tabIndex={-1} className={styles.end} aria-label={tamil ? "3D காட்சியின் முடிவு" : "End of 3D tour"} />
