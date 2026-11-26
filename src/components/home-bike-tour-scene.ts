@@ -4,10 +4,10 @@ import {
 } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-const markerPoints = [
-  new Vector3(-.135, -.105, .02),
-  new Vector3(-.115, .095, -.16),
-];
+const markerPoints = {
+  frame: [new Vector3(-.135, -.105, .02), new Vector3(-.115, .095, -.16)],
+  lights: [new Vector3(0, .036, -.48), new Vector3(0, -.055, -.47)],
+};
 
 function disposeModel(root: Object3D) {
   const textures = new Set<Texture>();
@@ -106,16 +106,15 @@ export async function createBikeTourScene(
   let height = 0;
   let framedForMobile = false;
   let previousYaw = NaN;
-  let previousShift = NaN;
-  let previousPins = false;
+  let previousPins: keyof typeof markerPoints | undefined;
 
-  function draw(yaw: number, shift: number, mobile: boolean, showPins: boolean) {
+  function draw(yaw: number, mobile: boolean, pins?: keyof typeof markerPoints) {
     if (lost || disposed) return;
     const nextWidth = host.clientWidth;
     const nextHeight = host.clientHeight;
     if (!nextWidth || !nextHeight) return;
     const resized = nextWidth !== width || nextHeight !== height || framedForMobile !== mobile;
-    if (!resized && yaw === previousYaw && shift === previousShift && showPins === previousPins) return;
+    if (!resized && yaw === previousYaw && pins === previousPins) return;
 
     if (resized) {
       width = nextWidth;
@@ -134,14 +133,12 @@ export async function createBikeTourScene(
     }
 
     previousYaw = yaw;
-    previousShift = shift;
-    previousPins = showPins;
+    previousPins = pins;
     pivot.rotation.y = yaw * Math.PI / 180;
-    pivot.position.x = shift * (camera.right - camera.left);
     renderer.render(scene, camera);
 
-    if (showPins) {
-      markerPoints.forEach((point, i) => {
+    if (pins) {
+      markerPoints[pins].forEach((point, i) => {
         projected.copy(point).applyMatrix4(pivot.matrixWorld).project(camera);
         const left = (projected.x + 1) * width / 2;
         const top = (1 - projected.y) * height / 2;

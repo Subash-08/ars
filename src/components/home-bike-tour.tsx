@@ -1,56 +1,96 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowDown, ArrowDownRight, ArrowUpRight, CircleDot, Lamp, MapPin } from "lucide-react";
+import { ArrowDown, ArrowDownRight, ArrowUpRight, MapPin } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Reveal } from "./reveal";
 import { useSiteLanguage } from "./site-language";
 import styles from "./home-bike-tour.module.css";
 
-const chapters = [
+type Localized = { en: string; ta: string };
+type Feature = { value: Localized; label: Localized; description?: Localized; unit?: Localized; pin?: number };
+type Chapter = {
+  id: string;
+  yaw: number;
+  label: Localized;
+  title: Localized;
+  text: Localized;
+  view: Localized;
+  features?: Feature[];
+  note?: Localized;
+  pins?: "frame" | "lights";
+  link?: { href: string; en: string; ta: string };
+};
+
+const chapters: Chapter[] = [
   {
-    id: "meet-e-luna", yaw: 90, mobileYaw: 90, offset: .20,
-    label: { en: "Overview", ta: "அறிமுகம்" },
-    title: { en: "Meet the E‑Luna.", ta: "E-Luna-வை அறிமுகம் செய்துகொள்ளுங்கள்." },
-    text: { en: "An electric two-wheeler for commutes, errands and short trips around town.", ta: "வேலைக்குச் செல்லவும், அன்றாடத் தேவைகளுக்கும், நகரத்தின் குறுகிய பயணங்களுக்கும் ஏற்ற மின்சார இருசக்கர வாகனம்." },
-    view: { en: "Full side view of the E-Luna", ta: "E-Luna-வின் முழுப் பக்கவாட்டுக் காட்சி" },
-    link: { href: "/e-luna", en: "Explore the E-Luna range", ta: "E-Luna மாடல்களைப் பாருங்கள்" },
+    id: "meet-e-luna", yaw: 0,
+    label: { en: "Front view", ta: "முன்புறம்" },
+    title: { en: "Meet the E‑Luna.", ta: "E‑Luna அறிமுகம்" },
+    text: { en: "See the headlamp, mirrors and easy step-through shape from the front. Then compare the models for your daily ride.", ta: "முன்புற விளக்கு, கண்ணாடிகள், எளிதாக ஏற உதவும் வடிவம் ஆகியவற்றைப் பாருங்கள். உங்கள் அன்றாடப் பயணத்துக்கு ஏற்ற மாடலை ஒப்பிடுங்கள்." },
+    view: { en: "Front view of the E-Luna", ta: "E-Luna-வின் முன்புறக் காட்சி" },
+    features: [
+      { value: { en: "110", ta: "110" }, unit: { en: "km", ta: "கி.மீ." }, label: { en: "Listed range", ta: "பட்டியலிட்ட பயணத் தூரம்" } },
+      { value: { en: "50", ta: "50" }, unit: { en: "km/h", ta: "கி.மீ./மணி" }, label: { en: "Listed top speed", ta: "பட்டியலிட்ட அதிகபட்ச வேகம்" } },
+    ],
+    note: { en: "PRO X3 catalogue figures. Confirm the exact configuration with the showroom.", ta: "இவை PRO X3 பட்டியல் விவரங்கள். சரியான வாகன அமைப்பை விற்பனை நிலையத்தில் உறுதிசெய்யுங்கள்." },
+    link: { href: "/e-luna", en: "Compare E-Luna models", ta: "E-Luna மாடல்களை ஒப்பிடுங்கள்" },
   },
   {
-    id: "space-for-your-day", yaw: 90, mobileYaw: 90, offset: .11,
-    label: { en: "Rider space", ta: "இடவசதி" },
-    title: { en: "Space for your day.", ta: "அன்றாடத் தேவைகளுக்கான இடவசதி." },
-    text: { en: "Two details to look for when you try the bike in person.", ta: "வாகனத்தை நேரில் பார்த்து ஓட்டும்போது இந்த இரண்டு அம்சங்களையும் கவனியுங்கள்." },
-    view: { en: "Side profile of the E-Luna", ta: "E-Luna-வின் பக்கவாட்டுக் காட்சி" },
-    details: [
-      { title: { en: "Step-through frame", ta: "திறந்த கால் இடம்" }, text: { en: "An open space between the seat and handlebars.", ta: "இருக்கைக்கும் கைப்பிடிக்கும் இடையில் திறந்த இடம்." } },
-      { title: { en: "Split seat", ta: "தனித்தனி இருக்கைகள்" }, text: { en: "Separate seat pads for the rider and passenger.", ta: "ஓட்டுநருக்கும் பின்பயணிக்கும் தனித்தனி இருக்கைகள்." } },
+    id: "space-for-your-day", yaw: 90,
+    label: { en: "First side", ta: "ஒரு பக்கம்" },
+    title: { en: "Room to ride.", ta: "வசதியான பயணம்" },
+    text: { en: "The full side view shows the space between the seat and handlebars.", ta: "இருக்கைக்கும் கைப்பிடிக்கும் இடையிலான இடத்தைப் பக்கவாட்டில் பார்க்கலாம்." },
+    view: { en: "Full side profile of the E-Luna", ta: "E-Luna-வின் முழுப் பக்கவாட்டுக் காட்சி" },
+    pins: "frame",
+    features: [
+      { value: { en: "Open", ta: "திறந்த" }, label: { en: "Step-through frame", ta: "கால் இடம்" }, description: { en: "A low, open space to step through when getting on or off.", ta: "ஏறி இறங்க உதவும் தாழ்வான, திறந்த கால் இடம்." }, pin: 1 },
+      { value: { en: "Split", ta: "தனித்தனி" }, label: { en: "Seat layout", ta: "இருக்கைகள்" }, description: { en: "Separate seat pads for the rider and passenger.", ta: "ஓட்டுநருக்கும் பின்பயணிக்கும் தனித்தனி இருக்கைகள்." }, pin: 2 },
     ],
   },
   {
-    id: "a-closer-look", yaw: 104, mobileYaw: 97, offset: -.20,
-    label: { en: "Bike details", ta: "வாகன விவரங்கள்" },
-    title: { en: "A closer look.", ta: "இன்னும் அருகிலிருந்து." },
-    text: { en: "A slight turn shows how the headlamp and rear wheel sit in the bike’s frame.", ta: "சிறிய கோண மாற்றத்தில், முகப்பு விளக்கும் பின்சக்கரமும் சட்டகத்தில் எப்படி அமைந்துள்ளன என்று பாருங்கள்." },
-    view: { en: "Side view of the E-Luna turned slightly toward the rear", ta: "பின்புறம் சற்றுத் திரும்பிய E-Luna-வின் பக்கவாட்டுக் காட்சி" },
-    parts: [
-      { icon: Lamp, en: "Headlamp", ta: "முகப்பு விளக்கு" },
-      { icon: CircleDot, en: "Rear wheel", ta: "பின்சக்கரம்" },
+    id: "a-closer-look", yaw: 180,
+    label: { en: "Rear view", ta: "பின்புறம்" },
+    title: { en: "See the rear details.", ta: "பின்புற விவரங்கள்" },
+    text: { en: "The rear angle brings the tail lamp and wheel assembly into view.", ta: "பின்புறக் கோணத்தில் விளக்கும் சக்கர அமைப்பும் தெளிவாகத் தெரியும்." },
+    view: { en: "Rear view of the E-Luna", ta: "E-Luna-வின் பின்புறக் காட்சி" },
+    pins: "lights",
+    features: [
+      { value: { en: "Tail lamp", ta: "பின் விளக்கு" }, label: { en: "Rear lighting", ta: "பின்புற ஒளி" }, description: { en: "The red lamp sits below the rear seat, with indicators on either side.", ta: "சிவப்பு விளக்கு பின் இருக்கைக்குக் கீழே உள்ளது. இருபுறமும் திருப்ப விளக்குகள் உள்ளன." }, pin: 1 },
+      { value: { en: "Mudguard", ta: "சேற்றுத் தடுப்பு" }, label: { en: "Rear wheel cover", ta: "பின்சக்கரக் கவசம்" }, description: { en: "The mudguard wraps over the rear wheel below the lights.", ta: "விளக்குகளுக்குக் கீழே, பின்சக்கரத்தின் மேல் சேற்றுத் தடுப்பு உள்ளது." }, pin: 2 },
     ],
     link: { href: "/e-luna#technical-specifications", en: "View specifications", ta: "விவரக்குறிப்புகளைப் பாருங்கள்" },
   },
   {
-    id: "see-it-in-salem", yaw: 90, mobileYaw: 90, offset: 0,
-    label: { en: "Test ride", ta: "சோதனை ஓட்டம்" },
-    title: { en: "See it in Salem.", ta: "சேலத்தில் நேரில் பாருங்கள்." },
-    text: { en: "Try the seating and handling for yourself at an ARS Motors showroom.", ta: "ARS Motors விற்பனை நிலையத்தில் இருக்கை வசதியையும் ஓட்டும் அனுபவத்தையும் நேரில் உணருங்கள்." },
-    view: { en: "E-Luna in its final showroom pose", ta: "இறுதி விற்பனை நிலையக் காட்சியில் E-Luna" },
-    link: { href: "/book-test-ride", en: "Book a test ride", ta: "சோதனை ஓட்டத்தைப் பதிவு செய்யுங்கள்" },
+    id: "see-it-in-salem", yaw: 270,
+    label: { en: "Opposite side", ta: "மறுபக்கம்" },
+    title: { en: "Try it in Salem.", ta: "சேலத்தில் ஓட்டிப் பாருங்கள்" },
+    text: { en: "Try the seating and handling, then ask our team about the configuration and on-road quote.", ta: "இருக்கை வசதியையும் ஓட்டும் அனுபவத்தையும் அறிந்து, மாடல் மற்றும் முழு விலையை எங்கள் குழுவிடம் கேளுங்கள்." },
+    view: { en: "Opposite side profile of the E-Luna", ta: "E-Luna-வின் மறுபக்கக் காட்சி" },
+    link: { href: "/book-test-ride", en: "Book a test ride", ta: "சோதனை ஓட்டம் பதிவு செய்யுங்கள்" },
   },
 ];
 
+const showrooms = [
+  { id: "seelanaickenpatti", en: "Seelanaickenpatti", ta: "சீலநாயக்கன்பட்டி" },
+  { id: "madathur", en: "Madathur", ta: "மாதத்தூர்" },
+];
 type InteractiveScene = Awaited<ReturnType<typeof import("./home-bike-tour-scene").createBikeTourScene>>;
 const lastChapter = chapters.length - 1;
+
+function FeatureStat({ feature, language }: { feature: Feature; language: keyof Localized }) {
+  return (
+    <dl className={styles.stat}>
+      <dt>{feature.label[language]}</dt>
+      <dd className={styles.statValue}>
+        {feature.pin && <span className={styles.pinIndex} aria-hidden="true">{feature.pin}</span>}
+        <span>{feature.value[language]}</span>
+        {feature.unit && <small>{feature.unit[language]}</small>}
+      </dd>
+      {feature.description && <dd className={styles.statText}>{feature.description[language]}</dd>}
+    </dl>
+  );
+}
 
 export function HomeBikeTour() {
   const { language } = useSiteLanguage();
@@ -64,10 +104,16 @@ export function HomeBikeTour() {
     const stage = stageRef.current;
     const canvas = canvasRef.current;
     const markers = markerRef.current;
-    if (!track || !stage || !canvas || !markers || !window.IntersectionObserver || !window.ResizeObserver) return;
+    if (!track || !stage || !canvas || !markers) return;
+    if (!window.IntersectionObserver || !window.ResizeObserver) {
+      track.dataset.static = "";
+      return;
+    }
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const compact = window.matchMedia("(max-width: 58rem)");
+    const shortScreen = window.matchMedia("(max-width: 48rem) and (max-height: 670px), (max-height: 470px)");
+    const useStills = () => motion.matches || shortScreen.matches;
     const panels = Array.from(track.querySelectorAll<HTMLElement>("[data-tour-panel]"));
     const dots = Array.from(track.querySelectorAll<HTMLElement>("[data-tour-dot]"));
     const controller = new AbortController();
@@ -79,21 +125,21 @@ export function HomeBikeTour() {
 
     const paint = () => {
       frame = 0;
-      if (!visible || document.hidden || motion.matches) return;
+      if (!visible || document.hidden || useStills()) return;
       const stageBounds = stage.getBoundingClientRect();
       const trackBounds = track.getBoundingClientRect();
       if (!stageBounds.height || stageBounds.bottom < 0 || stageBounds.top > window.innerHeight) return;
-      const progress = Math.max(0, Math.min(lastChapter, (stageBounds.top - trackBounds.top) / stageBounds.height));
-      const index = Math.min(lastChapter - 1, Math.floor(progress));
+      const position = Math.max(0, stageBounds.top - trackBounds.top);
+      let index = 0;
+      while (index < lastChapter - 1 && position >= panels[index + 1].offsetTop) index++;
       const from = chapters[index];
       const to = chapters[index + 1];
-      const phase = progress - index;
+      const span = panels[index + 1].offsetTop - panels[index].offsetTop;
+      const phase = Math.min(1, Math.max(0, (position - panels[index].offsetTop) / Math.max(1, span)));
+      const progress = index + phase;
       const ease = phase * phase * (3 - 2 * phase);
       const nearest = Math.round(progress);
-      const offset = from.offset + (to.offset - from.offset) * ease;
       const mobile = compact.matches;
-      const shift = mobile ? offset * .13 : offset * Math.min(1, 1500 / stageBounds.width);
-      stage.style.setProperty("--bike-shift", `${shift * 100}%`);
       if (nearest !== active) {
         active = nearest;
         stage.dataset.chapter = String(active + 1);
@@ -109,16 +155,15 @@ export function HomeBikeTour() {
         panel.toggleAttribute("data-tour-visible", current);
       });
 
-      const initialYaw = mobile ? from.mobileYaw : from.yaw;
-      const nextYaw = mobile ? to.mobileYaw : to.yaw;
-      const yaw = initialYaw + (nextYaw - initialYaw) * ease;
-      const markerOpacity = Math.max(0, 1 - Math.abs(progress - 1) * 4);
+      const yaw = from.yaw + (to.yaw - from.yaw) * ease;
+      const pins = chapters[nearest].pins;
+      const markerOpacity = pins ? Math.max(0, 1 - Math.abs(progress - nearest) * 5) : 0;
       markers.style.opacity = String(markerOpacity);
-      scene?.draw(yaw, shift, mobile, markerOpacity > 0);
+      scene?.draw(yaw, mobile, markerOpacity > 0 ? pins : undefined);
     };
 
     const schedule = () => {
-      if (visible && !document.hidden && !motion.matches && !frame) frame = requestAnimationFrame(paint);
+      if (visible && !document.hidden && !useStills() && !frame) frame = requestAnimationFrame(paint);
     };
 
     const resetCopy = () => {
@@ -131,23 +176,24 @@ export function HomeBikeTour() {
 
     const fail = () => {
       delete track.dataset.live;
+      track.dataset.static = "";
       markers.style.opacity = "0";
       resetCopy();
     };
 
     const start = async () => {
-      if (starting || scene || motion.matches || controller.signal.aborted) return;
+      if (starting || scene || useStills() || controller.signal.aborted || track.hasAttribute("data-static")) return;
       starting = true;
       try {
         const { createBikeTourScene } = await import("./home-bike-tour-scene");
-        if (controller.signal.aborted || motion.matches) return;
+        if (controller.signal.aborted || useStills()) return;
         const result = await createBikeTourScene(canvas, markers, controller.signal, fail);
         if (controller.signal.aborted) {
           result.dispose();
           return;
         }
         scene = result;
-        if (!motion.matches) {
+        if (!useStills()) {
           track.dataset.live = "";
           schedule();
         }
@@ -169,7 +215,7 @@ export function HomeBikeTour() {
     const resize = new ResizeObserver(schedule);
 
     const motionChange = () => {
-      if (motion.matches) {
+      if (useStills()) {
         delete track.dataset.live;
         resetCopy();
       } else if (scene?.available()) {
@@ -184,6 +230,7 @@ export function HomeBikeTour() {
     window.addEventListener("scroll", schedule, { passive: true });
     document.addEventListener("visibilitychange", schedule);
     motion.addEventListener("change", motionChange);
+    shortScreen.addEventListener("change", motionChange);
     return () => {
       controller.abort();
       nearing.disconnect();
@@ -192,6 +239,7 @@ export function HomeBikeTour() {
       window.removeEventListener("scroll", schedule);
       document.removeEventListener("visibilitychange", schedule);
       motion.removeEventListener("change", motionChange);
+      shortScreen.removeEventListener("change", motionChange);
       cancelAnimationFrame(frame);
       scene?.dispose();
       delete track.dataset.live;
@@ -207,7 +255,7 @@ export function HomeBikeTour() {
         <div>
           <p className={styles.eyebrow}>{tamil ? "360° காட்சியகம்" : "The 360° studio"}</p>
           <h2 id="bike-tour-title">{tamil ? "இயக்கத்தில் E‑Luna" : "E‑Luna in Motion"}</h2>
-          <p>{tamil ? "அன்றாடப் பயணத்துக்கான வாகனத்தைப் பல கோணங்களில் பாருங்கள்." : "Take a closer look at your everyday ride."}</p>
+          <p>{tamil ? "முன்புறம், பின்புறம், இரு பக்கங்களையும் பார்க்க உருட்டுங்கள் அல்லது ஒரு கோணத்தைத் தேர்வுசெய்யுங்கள்." : "Scroll to turn the bike, or jump to any of the four views."}</p>
         </div>
         <a href="#after-bike-tour" className={styles.skip}>
           {tamil ? "3D காட்சியைத் தவிர்க்கவும்" : "Skip 3D tour"}<ArrowDown size={15} aria-hidden="true"/>
@@ -237,38 +285,40 @@ export function HomeBikeTour() {
           {chapters.map((chapter, i) => (
             <article key={chapter.id} id={`bike-tour-${chapter.id}`} data-tour-panel className={styles.panel}>
               <div className={styles.still}>
-                <img src={chapter.parts ? "/3d/tour-detail.webp" : "/3d/tour-side.webp"} alt={chapter.view[language]} width={900} height={660} loading="lazy"/>
+                <img src={`/3d/tour-${chapter.id}.webp`} alt={chapter.view[language]} width={900} height={660} loading="lazy"/>
               </div>
               <div className={styles.copy}>
-                <h3>{chapter.title[language]}</h3>
-                <p>{chapter.text[language]}</p>
-                {chapter.details && (
-                  <ol className={styles.features}>
-                    {chapter.details.map((detail, index) => (
-                      <li key={detail.title.en}>
-                        <span aria-hidden="true">{index + 1}</span>
-                        <div><strong>{detail.title[language]}</strong><small>{detail.text[language]}</small></div>
-                      </li>
-                    ))}
-                  </ol>
-                )}
-                {chapter.parts && (
-                  <ul className={styles.parts}>
-                    {chapter.parts.map(({ icon: Icon, ...part }) => <li key={part.en}><Icon size={16} aria-hidden="true"/>{part[language]}</li>)}
-                  </ul>
-                )}
-                {chapter.link && (
-                  <div className={styles.actions}>
+                <div className={styles.lead}>
+                  <h3>{chapter.title[language]}</h3>
+                  <p>{chapter.text[language]}</p>
+                  {chapter.link && (
                     <Link href={chapter.link.href} className={i === lastChapter ? styles.primary : styles.secondary}>
                       {chapter.link[language]}
                       {i === lastChapter ? <ArrowDownRight size={18} aria-hidden="true"/> : <ArrowUpRight size={17} aria-hidden="true"/>}
                     </Link>
-                    {i === lastChapter && (
-                      <Link href="/showrooms" className={styles.showrooms}>
-                        <MapPin size={15} aria-hidden="true"/>
-                        {tamil ? "சேலம் விற்பனை நிலையங்களைப் பாருங்கள்" : "See Salem showrooms"}
-                      </Link>
-                    )}
+                  )}
+                </div>
+                {chapter.features && (
+                  <>
+                    <div className={styles.firstStat}><FeatureStat feature={chapter.features[0]} language={language}/></div>
+                    <div className={styles.context}>
+                      <FeatureStat feature={chapter.features[1]} language={language}/>
+                      {chapter.note && <p className={styles.note}>{chapter.note[language]}</p>}
+                    </div>
+                  </>
+                )}
+                {i === lastChapter && (
+                  <div className={styles.context}>
+                    <p className={styles.branchTitle}>{tamil ? "சேலம் விற்பனை நிலையங்கள்" : "Salem showrooms"}</p>
+                    <ul className={styles.branches}>
+                      {showrooms.map(branch => (
+                        <li key={branch.id}>
+                          <Link href={`/showrooms#${branch.id}`}>
+                            <MapPin size={16} aria-hidden="true"/>{branch[language]}<ArrowUpRight size={15} aria-hidden="true"/>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </div>
